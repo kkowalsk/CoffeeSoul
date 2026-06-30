@@ -1,0 +1,16 @@
+@startuml
+
+class "CoffeeComrade" as cc {
+    + id: uuid
+    + name: string
+}
+
+class "Brew" as br {
+    + id: uuid
+    + name: string
+    + description: string
+}
+
+cc "0..1"--"0..+" br 
+
+@enduml

@@ -94,7 +94,8 @@ check in session / pay for session
 
 ## stretch ideas
 * daily banner greeting the user with a friendly/silly phrase like "today's jaunt across the street for a sweet drink" 
-  * could use AI to generate silly phrases, even if they are hardcoded and not live 
+  * could use AI to generate silly phrases, even if they are hardcoded and not live
+  * mélange 
 
 # Schedule
 | date | goal | achieved | hours |
