@@ -8,6 +8,7 @@ class "CoffeeComrade" as cc {
 class "Brew" as br {
     + id: uuid
     + name: string
+    + price: float
     + description: string
 }
 
