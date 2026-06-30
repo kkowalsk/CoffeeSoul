@@ -1,0 +1,22 @@
+[
+  {
+    "name": "Alex",
+    "defaultBrewId": "Espresso"
+  },
+  {
+    "name": "Jordan",
+    "defaultBrewId": "Cappuccino"
+  },
+  {
+    "name": "Casey",
+    "defaultBrewId": "Americano"
+  },
+  {
+    "name": "Morgan",
+    "defaultBrewId": "Latte"
+  },
+  {
+    "name": "Riley",
+    "defaultBrewId": "Flat White"
+  }
+]
