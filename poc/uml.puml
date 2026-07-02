@@ -15,6 +15,8 @@ class "Brew" as br {
 class "Order" as or {
     + id: uuid
     + timestamp: datetime
+    + payee: CoffeeComrade
+    + total: int (calculated)
 }
 
 ' keep line items very simple, quantities can be expressed with multiple rows of the same foreign keys
@@ -22,9 +24,16 @@ class "LineItem" as li {
     + id: uuid
 }
 
-cc "<b>0..+"-"<b>0..1 " br : has default
-or "<b>1..+"--"<b>1" li : contains
+class "SmoothWeightedRoundRobin" as rr {
+    + id: uuid
+    + processedOrders: Orders[]
+}
+
+cc "<b>0..+ "-"<b>0..1 " br : has default
+or "<b>1..+ "--"<b>1 " li : contains
 li "<b>0..* "---"<b>1" br : has
-cc "<b>1"-"<b>0..+" li : on 
+cc "<b>1 "-"<b>0..+" li : on 
+or "<b>0..+   "---"<b>1" cc: payee
+or "<b>0..+"---"<b>1   " rr: processed
 
 @enduml
