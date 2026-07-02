@@ -63,15 +63,19 @@ class LineItem:
 # inspiration pulled from here
 # https://oneuptime.com/blog/post/2026-01-30-weighted-round-robin/view
 class SmoothWeightedRoundRobin:
-    def __init__(self):
+    def __init__(self, enforceOrder: bool = False):
         self.uuid = uuid.uuid4()
         self.orders = sortedcontainers.SortedKeyList(key=lambda o: o.timestamp)
         self.comradeWeights = dict()
         self.comradeTotals = dict()
         self.comradePayments = dict()
+        self.enforceOrder = enforceOrder
         
     # use to build up a history for testing
-    def add(self, order: Order):
+    def _add(self, order: Order):
+        if self.enforceOrder:
+            raise RuntimeError('insertion-based enforcement configured')
+
         self.orders.add(order)
         for i in order.items:
             self.comradeWeights.setdefault(i.comrade, 0)
@@ -107,6 +111,32 @@ class SmoothWeightedRoundRobin:
         for comrade in self.comradeWeights:
             print(f'{comrade.name} total {self.comradeTotals[comrade]}, weight {self.comradeWeights[comrade]}, payments {self.comradePayments[comrade]}. total% {round(self.comradeTotals[comrade]/overallTotal, 3)} vs. payment% {self.comradePayments[comrade]/len(self.orders)}')
 
+    # insertion based enforcement
+    def process(self, order: Order):
+        if not self.enforceOrder:
+            raise RuntimeError('insertion enforcement not configured')
+
+        order.timestamp = datetime.datetime.now()
+        self.orders.add(order)
+        for i in order.items:
+            self.comradeWeights.setdefault(i.comrade, 0)
+            self.comradeTotals.setdefault(i.comrade, 0)
+            self.comradePayments.setdefault(i.comrade, 0)
+        
+        total = order.calculateTotal()
+        
+        for li in order.items:
+            self.comradeWeights[li.comrade] += li.brew.price
+            self.comradeTotals[li.comrade] += li.brew.price
+        
+
+        payee = None
+        for comrade, weight in self.comradeWeights.items():
+            if payee is None or weight > self.comradeWeights[payee]:
+                payee = comrade
+        self.comradeWeights[payee] -= total
+        self.comradePayments[payee] += 1
+        order.setPayee(payee)
 
     def __str__(self):
         return "".join(f'{o}\n' for o in self.orders)
@@ -169,13 +199,16 @@ def init():
 
         # print(comrade.name, total)
 
-    roundRobin = SmoothWeightedRoundRobin()
-    for o in reversed(orders):
-        roundRobin.add(o)
+    roundRobin = SmoothWeightedRoundRobin(True)
+    # for o in reversed(orders):
+        # roundRobin._add(o)
     print("\nRoundRobin:")
     print(roundRobin)
     print()
-    roundRobin.calculateHistoricalPayees()
+    # roundRobin.calculateHistoricalPayees()
+    for i in range(10):
+        roundRobin.process(orders[i])
+        print(f'{orders[i].payee.name}\'s turn to pay')
 
 
 if __name__ == "__main__":
