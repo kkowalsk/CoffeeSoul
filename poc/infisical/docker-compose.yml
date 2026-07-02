@@ -1,0 +1,58 @@
+# Self-hosted Infisical, adapted from the official reference compose file:
+# https://github.com/Infisical/infisical/blob/main/docker-compose.prod.yml
+#
+# Service names are prefixed with infisical- so they don't collide with the
+# coffee_soul db/app services when this file is merged in via the top-level
+# poc/docker-compose.yml `include:`.
+#
+# First run: open http://localhost:8080 to create an admin account, org, and
+# project (e.g. "coffee-soul"), then add POSTGRES_USER/POSTGRES_PASSWORD as
+# secrets there and generate a machine identity token for local use.
+services:
+  infisical:
+    restart: unless-stopped
+    depends_on:
+      infisical-db:
+        condition: service_healthy
+      infisical-redis:
+        condition: service_started
+    image: infisical/infisical:latest # pin to a specific tag for anything beyond local POC use
+    env_file:
+      - .env
+    ports:
+      - "8080:8080"
+    environment:
+      NODE_ENV: production
+      DB_CONNECTION_URI: postgres://${INFISICAL_DB_USER}:${INFISICAL_DB_PASSWORD}@infisical-db:5432/infisical
+
+  infisical-redis:
+    image: redis
+    restart: always
+    environment:
+      ALLOW_EMPTY_PASSWORD: "yes"
+    volumes:
+      - infisical_redis_data:/data
+
+  infisical-db:
+    image: postgres:14-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: ${INFISICAL_DB_USER}
+      POSTGRES_PASSWORD: ${INFISICAL_DB_PASSWORD}
+      POSTGRES_DB: infisical
+    volumes:
+      - infisical_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: "pg_isready --username=${INFISICAL_DB_USER} --dbname=infisical && psql --username=${INFISICAL_DB_USER} --dbname=infisical --list"
+      interval: 5s
+      timeout: 10s
+      retries: 10
+
+# Pinned to fixed names so this always reattaches to the same data no matter
+# which compose project context includes this file (standalone vs. via the
+# top-level poc/docker-compose.yml `include:`).
+volumes:
+  infisical_pg_data:
+    name: infisical_infisical_pg_data
+  infisical_redis_data:
+    name: infisical_infisical_redis_data

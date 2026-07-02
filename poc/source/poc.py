@@ -210,6 +210,12 @@ def init():
         roundRobin.process(procurements[i])
         print(f'{procurements[i].payee.name}\'s turn to pay')
 
+    try:
+        while True:
+            # your code here
+            pass
+    except KeyboardInterrupt:
+        print("\nStopped by user (Ctrl-C)")
 
 if __name__ == "__main__":
     init()
