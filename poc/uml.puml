@@ -12,7 +12,7 @@ class "Brew" as br {
     + description: string
 }
 
-class "Order" as or {
+class "Procurement" as pr {
     + id: uuid
     + timestamp: datetime
     + payee: CoffeeComrade
@@ -26,14 +26,14 @@ class "LineItem" as li {
 
 class "SmoothWeightedRoundRobin" as rr {
     + id: uuid
-    + processedOrders: Orders[]
+    + processedProcurements: Procurement[]
 }
 
 cc "<b>0..+ "-"<b>0..1 " br : has default
-or "<b>1..+ "--"<b>1 " li : contains
+pr "<b>1..+ "--"<b>1 " li : contains
 li "<b>0..* "---"<b>1" br : has
-cc "<b>1 "-"<b>0..+" li : on 
-or "<b>0..+   "---"<b>1" cc: payee
-or "<b>0..+"---"<b>1   " rr: processed
+cc "<b>1 "-"<b>0..+" li : on
+pr "<b>0..+   "---"<b>1" cc: payee
+pr "<b>0..+"---"<b>1   " rr: processed
 
 @enduml
