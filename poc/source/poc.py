@@ -42,7 +42,7 @@ class Procurement:
     def removeLineItem(self, lineItem: LineItem):
         self.items.remove(lineItem)
 
-    def calculateTotal(self) -> int:
+    def calculateTotal(self) -> float:
         runningTotal = 0
         for item in self.items:
             runningTotal += item.brew.price
@@ -209,13 +209,6 @@ def init():
     for i in range(10):
         roundRobin.process(procurements[i])
         print(f'{procurements[i].payee.name}\'s turn to pay')
-
-    try:
-        while True:
-            # your code here
-            pass
-    except KeyboardInterrupt:
-        print("\nStopped by user (Ctrl-C)")
 
 if __name__ == "__main__":
     init()

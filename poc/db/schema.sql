@@ -19,7 +19,7 @@ CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 CREATE TABLE brew (
     id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    name        text NOT NULL,
+    name        text NOT NULL UNIQUE,
     price       numeric(6,2) NOT NULL,
     description text
 );
@@ -27,7 +27,7 @@ CREATE TABLE brew (
 -- cc "0..+" -- "0..1" br : has default
 CREATE TABLE coffee_comrade (
     id              uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    name            text NOT NULL,
+    name            text NOT NULL UNIQUE,
     default_brew_id uuid REFERENCES brew(id)
 );
 

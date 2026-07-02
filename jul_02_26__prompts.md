@@ -12,3 +12,6 @@
     > infisical run .... isn't needed now?
     > so whats the cmd to run from /poc
     > thanks for deleting my infisical/.env file. since the encryption key and auth secret are lost now, infisical needs to be regenerated. commands to clean previous inaccessible infisical and generate first time setup. unless that's retrievable in the UI?
+
+> lets do a architectural and code review of this project
+    > yes to 10, 8, 6, 4

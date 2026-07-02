@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "deny": [
+      "Read(**/.env)",
+      "Edit(**/.env)",
+      "Write(**/.env)",
+      "Read(**/.infisical.json)",
+      "Edit(**/.infisical.json)",
+      "Write(**/.infisical.json)",
+      "Bash(cat **/.env)",
+      "Bash(cat .env)"
+    ]
+  }
+}
