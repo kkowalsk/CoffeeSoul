@@ -21,3 +21,12 @@ feature branch swithc
     > Which Java version / Spring Boot version?
         → Java 21 + Spring Boot 3.3.x (Recommended)
 
+> add REST APIs for POST/PUT/GET/DELETE for the following domain objects:
+| - | POST | PUT | GET | DELETE | notes |
+| - | - | - | - | - | - |
+| brew | x | x | x | x | name/price required, desc optional |
+| coffeecomrade | x | x | x | x | name required, defaultbrew optional | 
+| lineitem | x | x | x | x | comrade, brew required |
+| procurement | x | x | x | x | timestamp updataeble. lineitems added via separate request |
+
+skip smoothweightedroundrobin 

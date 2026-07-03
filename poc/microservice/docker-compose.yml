@@ -2,6 +2,9 @@ services:
   microservice:
     build: .
     restart: unless-stopped
+    # 8081 on the host -> 8080 in the container; 8080 is already taken by infisical.
+    ports:
+      - "8081:8080"
     depends_on:
       db:
         condition: service_healthy
