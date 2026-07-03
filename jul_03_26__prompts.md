@@ -39,3 +39,17 @@ skip smoothweightedroundrobin
     > refactor to jq
 
 > what's a better pattern for applying the schema to the db on startup if does not exist?
+    > yes wire up the embedded-Flyway version
+
+> git mv the following folders and supplemental files out of /poc.
+  database-seeding
+  db
+  infisical
+  microservice
+
+  all that should be left in /poc is /source and other required files to run $python poc.py in localhost. strip poc.py of database connection code - it should only create in-memory objects
+
+  open to suggestions of how to structure it at repo top level
+
+    > · How should the moved containerized stack (db, database-seeding, microservice, infisical + docker-compose.yml + the .sh scripts) be arranged at the repo top level? → Group under stack/ (Recommended)
+    2> poc/source/ still has container files for the old Python app (Dockerfile, docker-compose.yml, .env.example) that predate the Java microservice. Since poc/ is becoming local-only (python poc.py), what should happen to them? → Remove them (Recommended)

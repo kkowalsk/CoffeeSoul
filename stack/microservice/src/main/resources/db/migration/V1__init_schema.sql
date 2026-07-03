@@ -1,4 +1,4 @@
--- Schema derived from poc/uml.puml and the classes in poc/poc.py.
+-- Schema derived from uml.puml and the classes in poc/source/poc.py.
 --
 -- Mapping notes:
 --   CoffeeComrade  -> coffee_comrade

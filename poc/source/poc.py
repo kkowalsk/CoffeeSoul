@@ -1,10 +1,8 @@
 from __future__ import annotations
-import os
 import uuid
 import datetime
 import json
 import sortedcontainers
-import psycopg2
 
 class CoffeeComrade:
     def __init__(self, name: str, brew: Brew = None):
@@ -143,51 +141,10 @@ class SmoothWeightedRoundRobin:
     def __str__(self):
         return "".join(f'{p}\n' for p in self.procurements)
 
-class DataConnection:
-    """Connection to the coffee_soul Postgres db.
-
-    Credentials come from POSTGRES_USER/POSTGRES_PASSWORD in the environment
-    -- e.g. `infisical run` injecting them as process env vars before `docker
-    compose up`, or a source/.env file for local dev.
-    """
-
-    def __init__(self):
-        self.host = os.environ.get("POSTGRES_HOST", "db")
-        self.port = int(os.environ.get("POSTGRES_PORT", "5432"))
-        self.dbname = os.environ.get("POSTGRES_DB", "coffee_soul")
-        self.user = os.environ["POSTGRES_USER"]
-        self.password = os.environ["POSTGRES_PASSWORD"]
-        self.connection = None
-
-    def connect(self):
-        self.connection = psycopg2.connect(
-            host=self.host,
-            port=self.port,
-            dbname=self.dbname,
-            user=self.user,
-            password=self.password,
-        )
-        return self.connection
-
-    def close(self):
-        if self.connection is not None:
-            self.connection.close()
-            self.connection = None
-
-    def isOpen(self) -> bool:
-        return self.connection is not None and self.connection.closed == 0
-
 def init():
-    db = DataConnection()
-    with db.connect().cursor() as cursor:
-        cursor.execute("SELECT version();")
-        print(f"connected to db as {db.user}: {cursor.fetchone()[0]}")
-    # db.close()
-
-    if is not db.isOpen:
-        print(f'unable to connect to postgres')
-        exit()
-
+    # In-memory only: load the seed data, build the domain objects, and run the
+    # round robin. No database -- persistence lives in the containerized stack
+    # (see ../../stack/microservice).
     brews = []
     comrades = []
     procurements = []
