@@ -1,5 +1,5 @@
 services:
-  app:
+  database-seeding:
     build: .
     depends_on:
       db:
@@ -7,8 +7,5 @@ services:
     environment:
       POSTGRES_HOST: db
       POSTGRES_DB: coffee_soul
-      # Resolved by the shell before `docker compose up` -- either a plain
-      # export, a source/.env file for local dev, or `infisical run`
-      # injecting the two secrets as process env vars.
       POSTGRES_USER: ${POSTGRES_USER:-}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-}

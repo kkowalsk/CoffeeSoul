@@ -1,6 +1,7 @@
 services:
   db:
     image: postgres:16-alpine
+    command: ["postgres", "-c", "timezone=America/Denver"]
     environment:
       POSTGRES_DB: coffee_soul
       POSTGRES_USER: ${POSTGRES_USER}

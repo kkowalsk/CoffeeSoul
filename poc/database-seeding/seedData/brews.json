@@ -1,0 +1,42 @@
+[
+  {
+    "name": "Espresso",
+    "price": 3.00,
+    "description": "Bold and intense single shot of espresso"
+  },
+  {
+    "name": "Americano",
+    "price": 3.50,
+    "description": "Espresso diluted with hot water"
+  },
+  {
+    "name": "Cappuccino",
+    "price": 4.00,
+    "description": "Espresso with equal parts steamed milk and foam"
+  },
+  {
+    "name": "Latte",
+    "price": 4.00,
+    "description": "Espresso with steamed milk and a light layer of foam"
+  },
+  {
+    "name": "Flat White",
+    "price": 4.50,
+    "description": "Espresso with velvety steamed milk"
+  },
+  {
+    "name": "Macchiato",
+    "price": 3.75,
+    "description": "Espresso marked with a touch of steamed milk"
+  },
+  {
+    "name": "Cortado",
+    "price": 3.50,
+    "description": "Equal parts espresso and steamed milk"
+  },
+  {
+    "name": "Affogato",
+    "price": 5.00,
+    "description": "Vanilla ice cream topped with hot espresso"
+  }
+]
