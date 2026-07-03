@@ -1,1 +1,2 @@
 sortedcontainers
+psycopg2-binary

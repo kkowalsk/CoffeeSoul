@@ -1,14 +1,14 @@
 services:
-  app:
+  database-seeding:
     build: .
+    # waits for the microservice, not just the db: the microservice's Flyway
+    # migrations create the schema this seeder inserts into, so it must run
+    # after the app is healthy.
     depends_on:
-      db:
+      microservice:
         condition: service_healthy
     environment:
       POSTGRES_HOST: db
       POSTGRES_DB: coffee_soul
-      # Resolved by the shell before `docker compose up` -- either a plain
-      # export, a source/.env file for local dev, or `infisical run`
-      # injecting the two secrets as process env vars.
       POSTGRES_USER: ${POSTGRES_USER:-}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-}

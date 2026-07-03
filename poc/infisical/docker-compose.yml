@@ -24,12 +24,14 @@ services:
     environment:
       NODE_ENV: production
       DB_CONNECTION_URI: postgres://${INFISICAL_DB_USER}:${INFISICAL_DB_PASSWORD}@infisical-db:5432/infisical
+      REDIS_URL: redis://:${INFISICAL_REDIS_PASSWORD}@infisical-redis:6379
 
   infisical-redis:
     image: redis
     restart: always
-    environment:
-      ALLOW_EMPTY_PASSWORD: "yes"
+    # official redis image, not bitnami -- ALLOW_EMPTY_PASSWORD is a bitnami-only
+    # env var and was a no-op here; auth is set directly via --requirepass instead.
+    command: ["redis-server", "--requirepass", "${INFISICAL_REDIS_PASSWORD}"]
     volumes:
       - infisical_redis_data:/data
 

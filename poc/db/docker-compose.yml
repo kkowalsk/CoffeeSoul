@@ -1,6 +1,7 @@
 services:
   db:
     image: postgres:16-alpine
+    command: ["postgres", "-c", "timezone=America/Denver"]
     environment:
       POSTGRES_DB: coffee_soul
       POSTGRES_USER: ${POSTGRES_USER}
@@ -8,7 +9,8 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - ./schema.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
+      # schema is now owned by the microservice via Flyway migrations
+      # (microservice/src/main/resources/db/migration), applied on app startup.
       - db_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d coffee_soul"]
