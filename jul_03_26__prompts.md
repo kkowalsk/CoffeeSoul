@@ -53,3 +53,9 @@ skip smoothweightedroundrobin
 
     > · How should the moved containerized stack (db, database-seeding, microservice, infisical + docker-compose.yml + the .sh scripts) be arranged at the repo top level? → Group under stack/ (Recommended)
     2> poc/source/ still has container files for the old Python app (Dockerfile, docker-compose.yml, .env.example) that predate the Java microservice. Since poc/ is becoming local-only (python poc.py), what should happen to them? → Remove them (Recommended)
+
+> if adding a ui to the stack folder, what is the naming convention? /frontend ?
+    > explain CORS decision further
+    > also, this will be deployed to the web eventually
+    > yes, scafford the frontend/ folder (which is actually the newly created web/ folder) and rename the microservce/ folder to api/
+    > rename the java packages
