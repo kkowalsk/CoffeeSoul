@@ -30,3 +30,7 @@ feature branch swithc
 | procurement | x | x | x | x | timestamp updataeble. lineitems added via separate request |
 
 skip smoothweightedroundrobin 
+
+> extract url and versioning properties to application.properties file
+
+> application.yaml vs application.properties
