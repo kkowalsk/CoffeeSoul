@@ -37,21 +37,19 @@ class DataConnection:
     def isOpen(self) -> bool:
         return self.connection is not None and self.connection.closed == 0
 
-# brew/coffee_comrade are dropped and replaced on every run; CASCADE also
-# takes out procurement/line_item since they FK-reference those two tables,
-# so the full schema is re-applied to leave the db consistent afterward.
-def dropAndRecreateSchema(cursor):
-    cursor.execute("DROP TABLE IF EXISTS line_item, procurement, smooth_weighted_round_robin, coffee_comrade, brew CASCADE;")
-    with open('./schema.sql', 'r') as file:
-        cursor.execute(file.read())
-
+# Data-only seeding. The schema is owned by the microservice's Flyway
+# migrations, so this no longer creates or drops tables -- it just upserts the
+# reference data. ON CONFLICT (name) DO UPDATE keeps it idempotent (safe to
+# re-run on every `docker compose up`) and always returns the row id.
 def seedBrews(cursor) -> dict:
     brewIdByName = {}
     with open('./seedData/brews.json', 'r') as file:
         data = json.load(file)
         for b in data:
             cursor.execute(
-                "INSERT INTO brew (name, price, description) VALUES (%s, %s, %s) RETURNING id",
+                "INSERT INTO brew (name, price, description) VALUES (%s, %s, %s) "
+                "ON CONFLICT (name) DO UPDATE SET price = EXCLUDED.price, "
+                "description = EXCLUDED.description RETURNING id",
                 (b["name"], b["price"], b["description"]),
             )
             brewIdByName[b["name"]] = cursor.fetchone()[0]
@@ -63,7 +61,8 @@ def seedComrades(cursor, brewIdByName: dict):
         data = json.load(file)
         for c in data:
             cursor.execute(
-                "INSERT INTO coffee_comrade (name, default_brew_id) VALUES (%s, %s)",
+                "INSERT INTO coffee_comrade (name, default_brew_id) VALUES (%s, %s) "
+                "ON CONFLICT (name) DO UPDATE SET default_brew_id = EXCLUDED.default_brew_id",
                 (c["name"], brewIdByName[c["defaultBrewId"]]),
             )
             print(f'seeded comrade {c["name"]}')
@@ -76,12 +75,11 @@ def init():
         exit(1)
 
     with db.connection.cursor() as cursor:
-        dropAndRecreateSchema(cursor)
         brewIdByName = seedBrews(cursor)
         seedComrades(cursor, brewIdByName)
 
     db.close()
-    print("database seeded: brew and coffee_comrade replaced")
+    print("database seeded: brew and coffee_comrade upserted")
 
 if __name__ == "__main__":
     init()

@@ -6,7 +6,6 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY seed.py .
-COPY schema.sql .
 COPY seedData ./seedData
 
 CMD ["python3", "seed.py"]

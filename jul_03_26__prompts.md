@@ -34,3 +34,8 @@ skip smoothweightedroundrobin
 > extract url and versioning properties to application.properties file
 
 > application.yaml vs application.properties
+
+> following the example set in poc/source/poc.python, generate curl commands and serialize to file for setting up and processing 10 orders
+    > refactor to jq
+
+> what's a better pattern for applying the schema to the db on startup if does not exist?
