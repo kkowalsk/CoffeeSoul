@@ -1,11 +1,10 @@
 services:
   microservice:
     build: .
+    restart: unless-stopped
     depends_on:
       db:
         condition: service_healthy
-      database-seeding:
-        condition: service_completed_successfully
     environment:
       POSTGRES_HOST: db
       POSTGRES_DB: coffee_soul

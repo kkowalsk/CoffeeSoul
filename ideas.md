@@ -111,3 +111,6 @@ check in session / pay for session
 # Reflections on design
 * line item quantity does not need to be represented in a column, it can be calculated / queried by the existence of multiple rows 
 * this is a classic scheduling problem that no doubt has solutions for both CPU and GPU related context. one question is to re-solve the calculus or re-use a known algorithm.
+
+# TODOs
+[] checkout repo and double check steps listed in repo

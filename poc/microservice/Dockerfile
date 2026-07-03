@@ -1,11 +1,16 @@
-FROM python:3.12-slim
+FROM gradle:8.10-jdk21 AS build
 
 WORKDIR /app
 
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+COPY build.gradle settings.gradle ./
+COPY src ./src
+RUN gradle bootJar --no-daemon
 
-COPY service.py .
-COPY seedData ./seedData
+FROM eclipse-temurin:21-jre-alpine
 
-CMD ["python3", "service.py"]
+WORKDIR /app
+
+COPY --from=build /app/build/libs/*.jar app.jar
+
+EXPOSE 8080
+CMD ["java", "-jar", "app.jar"]
