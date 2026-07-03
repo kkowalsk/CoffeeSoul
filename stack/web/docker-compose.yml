@@ -1,0 +1,13 @@
+services:
+  web:
+    build: .
+    restart: unless-stopped
+    # 8082 on the host -> 80 in the container. This nginx is the single public
+    # entry point (serves the UI, proxies /api to the api service). In a real
+    # web deployment this -- behind TLS on 443 -- is the ONLY published port;
+    # api / db / infisical all stay internal-only.
+    ports:
+      - "8082:80"
+    depends_on:
+      api:
+        condition: service_healthy
