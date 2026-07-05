@@ -16,3 +16,8 @@
         > no, keep the first "only animate new connections" code
 
 > when the <BusyButton> element is clicked, note the existing connections (print them to console) then clear all existing connections. this will be utilized to make API calls soon
+
+> time to wire this to the backend:
+  1) coffee options should be dynamically created from existing coffees retrieved from API
+  2) persons options should be dynamically created from existing coffee_comrades retrieved from API
+  3) clicking "place order" busy button should make API calls to submit an Order with LineItems

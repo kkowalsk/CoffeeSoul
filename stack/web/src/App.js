@@ -16,6 +16,27 @@ import {
   Stack
 } from 'grommet';
 
+// --- backend API ---
+// Relative URLs: in prod the web nginx proxies /api to the api service; in dev
+// the CRA "proxy" field in package.json forwards /api to the api container.
+const API = '/api/v1';
+
+async function getJson(path) {
+  const res = await fetch(`${API}${path}`);
+  if (!res.ok) throw new Error(`GET ${path} -> ${res.status}`);
+  return res.json();
+}
+
+async function postJson(path, body) {
+  const res = await fetch(`${API}${path}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) throw new Error(`POST ${path} -> ${res.status}`);
+  return res.json();
+}
+
 const theme = {
   global: {
     colors: {
@@ -38,8 +59,6 @@ const AppBar = (props) => (
   />
 );
 
-const COFFEES = ['Coffee1', 'Coffee2', 'Coffee3'];
-const PERSONS = ['Person1', 'Person2', 'Person3'];
 // draw-in animation duration (ms) for a newly created connection
 const DRAW_MS = 1000;
 
@@ -60,7 +79,10 @@ const OptionBox = ({ id, label, active, onClick }) => (
 );
 
 function App() {
-  // Each connection is a { fromTarget: coffeeId, toTarget: personId } pair.
+  // Coffees (brews) and people (coffee_comrades), loaded from the API on mount.
+  const [coffees, setCoffees] = useState([]);
+  const [persons, setPersons] = useState([]);
+  // Each connection is a { fromTarget: brewId, toTarget: comradeId } pair.
   const [connections, setConnections] = useState([]);
   // The coffee currently being edited (the "from" side).
   const [coffee, setCoffee] = useState();
@@ -68,6 +90,13 @@ function App() {
   // finishes so it hands off to the static (non-animating) layer.
   const [drawing, setDrawing] = useState(null);
   const flip = flipConnection(setConnections);
+
+  useEffect(() => {
+    getJson('/brews').then(setCoffees).catch((e) => console.error('load brews', e));
+    getJson('/coffee-comrades')
+      .then(setPersons)
+      .catch((e) => console.error('load comrades', e));
+  }, []);
 
   const isConnected = (coffeeId, personId) =>
     connections.some((c) => c.fromTarget === coffeeId && c.toTarget === personId);
@@ -85,10 +114,22 @@ function App() {
     }
   };
 
-  // "Place Order": note the current connections (soon to become an API call)
-  // then clear them so the board resets for the next order.
-  const placeOrder = () => {
+  // "Place Order": create an Order (procurement), then a LineItem per connection
+  // (coffee = brew = fromTarget, person = comrade = toTarget), then clear.
+  const placeOrder = async () => {
+    if (connections.length === 0) return;
     console.log('placing order for connections:', connections);
+    const order = await postJson('/procurements', {});
+    await Promise.all(
+      connections.map((c) =>
+        postJson('/line-items', {
+          procurementId: order.id,
+          brewId: c.fromTarget,
+          comradeId: c.toTarget,
+        }),
+      ),
+    );
+    console.log('order placed:', order.id);
     setConnections([]);
   };
 
@@ -118,24 +159,24 @@ function App() {
               pad={{ horizontal: 'xlarge', vertical: 'medium' }}
             >
               <Box gap="medium">
-                {COFFEES.map((c) => (
+                {coffees.map((brew) => (
                   <OptionBox
-                    key={c}
-                    id={c}
-                    label={c}
-                    active={coffee === c}
-                    onClick={() => setCoffee(c)}
+                    key={brew.id}
+                    id={brew.id}
+                    label={brew.name}
+                    active={coffee === brew.id}
+                    onClick={() => setCoffee(brew.id)}
                   />
                 ))}
               </Box>
               <Box gap="medium">
-                {PERSONS.map((p) => (
+                {persons.map((comrade) => (
                   <OptionBox
-                    key={p}
-                    id={p}
-                    label={p}
-                    active={!!coffee && isConnected(coffee, p)}
-                    onClick={() => selectPerson(p)}
+                    key={comrade.id}
+                    id={comrade.id}
+                    label={comrade.name}
+                    active={!!coffee && isConnected(coffee, comrade.id)}
+                    onClick={() => selectPerson(comrade.id)}
                   />
                 ))}
               </Box>
@@ -183,16 +224,17 @@ export const BusyButton = ({ onOrder }) => {
       busy={busy} 
       success={success}
       label="Place Order"
-      onClick={() => {
-        onOrder?.();
+      onClick={async () => {
         setBusy(true);
-        setTimeout(() => {
-          setBusy(false);
+        try {
+          await onOrder?.();
           setSuccess(true);
-        }, 2000);
-        setTimeout(() => {
-          setSuccess(false);
-        }, 4000);
+          setTimeout(() => setSuccess(false), 2000);
+        } catch (e) {
+          console.error('order failed', e);
+        } finally {
+          setBusy(false);
+        }
       }}
     >
     </Button>
