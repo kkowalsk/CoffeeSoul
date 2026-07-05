@@ -16,7 +16,7 @@ import {
 } from 'grommet';
 import OrderView, { DRAW_MS, connection, flipConnection } from './views/OrderView';
 import PeopleView from './views/PeopleView';
-import DrinksView from './views/DrinksView';
+import BrewsView from './views/BrewsView';
 import MetricsView from './views/MetricsView';
 
 // --- backend API ---
@@ -151,6 +151,13 @@ function App() {
     setPersons((prev) => [...prev, created]);
   };
 
+  // Add a new brew, then append it to the loaded list so the Brews tab's
+  // card grid (and the Order tab's coffee list) picks it up without a refetch.
+  const createBrew = async ({ name, price, description }) => {
+    const created = await postJson('/brews', { name, price, description });
+    setCoffees((prev) => [...prev, created]);
+  };
+
   return (
     <Grommet theme={theme} full>
       <AppBar>
@@ -192,10 +199,10 @@ function App() {
               <PeopleView persons={persons} coffees={coffees} onCreatePerson={createPerson} />
             </Tab>
             <Tab
-              // title={<Text size="large">Drinks</Text>}
+              // title={<Text size="large">Brews</Text>}
               icon={<img src="/coffee-cup.png" alt="" width={TAB_ICON_SIZE} height={TAB_ICON_SIZE} />}
             >
-              <DrinksView />
+              <BrewsView coffees={coffees} onCreateBrew={createBrew} />
             </Tab>
             <Tab
               // title={<Text size="large">Metrics</Text>}
