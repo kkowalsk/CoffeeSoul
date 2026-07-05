@@ -23,3 +23,7 @@
   3) clicking "place order" busy button should make API calls to submit an Order with LineItems
 
 > ui improvement: render existing Coffee--Person connections for non-selected coffee in a slightly transparent grey so it's apparent what other people have selected for their coffee
+
+> extract businesslogic from Controllers to Services in API
+
+> using LoggerFactory, add logging for ever request in Services

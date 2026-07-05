@@ -1,8 +1,8 @@
 package com.coffeesoul.api.web.controller;
 
-import com.coffeesoul.api.repository.CoffeeComradeRepository;
 import com.coffeesoul.api.web.dto.CoffeeComradeRequest;
 import com.coffeesoul.api.web.dto.CoffeeComradeResponse;
+import com.coffeesoul.api.web.service.CoffeeComradeService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,37 +22,37 @@ import java.util.UUID;
 @RequestMapping("/coffee-comrades")
 public class CoffeeComradeController {
 
-    private final CoffeeComradeRepository repository;
+    private final CoffeeComradeService service;
 
-    public CoffeeComradeController(CoffeeComradeRepository repository) {
-        this.repository = repository;
+    public CoffeeComradeController(CoffeeComradeService service) {
+        this.service = service;
     }
 
     @PostMapping
     public ResponseEntity<CoffeeComradeResponse> create(@Valid @RequestBody CoffeeComradeRequest request) {
-        CoffeeComradeResponse created = repository.create(request.name(), request.defaultBrewId());
+        CoffeeComradeResponse created = service.create(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     @GetMapping
     public List<CoffeeComradeResponse> list() {
-        return repository.findAll();
+        return service.list();
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<CoffeeComradeResponse> get(@PathVariable UUID id) {
-        return ResponseEntity.of(repository.findById(id));
+        return ResponseEntity.of(service.get(id));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<CoffeeComradeResponse> update(
             @PathVariable UUID id, @Valid @RequestBody CoffeeComradeRequest request) {
-        return ResponseEntity.of(repository.update(id, request.name(), request.defaultBrewId()));
+        return ResponseEntity.of(service.update(id, request));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
-        return repository.delete(id)
+        return service.delete(id)
                 ? ResponseEntity.noContent().build()
                 : ResponseEntity.notFound().build();
     }

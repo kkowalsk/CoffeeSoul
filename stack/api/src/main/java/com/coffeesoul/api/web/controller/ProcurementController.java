@@ -1,9 +1,9 @@
 package com.coffeesoul.api.web.controller;
 
-import com.coffeesoul.api.repository.ProcurementRepository;
 import com.coffeesoul.api.web.dto.ProcurementRequest;
 import com.coffeesoul.api.web.dto.ProcurementResponse;
 import com.coffeesoul.api.web.dto.ProcurementTotalResponse;
+import com.coffeesoul.api.web.service.ProcurementService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,51 +23,51 @@ import java.util.UUID;
 @RequestMapping("/procurements")
 public class ProcurementController {
 
-    private final ProcurementRepository repository;
+    private final ProcurementService service;
 
-    public ProcurementController(ProcurementRepository repository) {
-        this.repository = repository;
+    public ProcurementController(ProcurementService service) {
+        this.service = service;
     }
 
     // line items are added separately via POST /line-items referencing the id
     // returned here.
     @PostMapping
     public ResponseEntity<ProcurementResponse> create(@Valid @RequestBody ProcurementRequest request) {
-        ProcurementResponse created = repository.create(request.timestamp(), request.payeeId());
+        ProcurementResponse created = service.create(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     @GetMapping
     public List<ProcurementResponse> list() {
-        return repository.findAll();
+        return service.list();
     }
 
     // calculated totals from v_procurement_total (sum of line-item brew prices).
     // Declared before /{id} so the literal "totals" segment isn't matched as an id.
     @GetMapping("/totals")
     public List<ProcurementTotalResponse> totals() {
-        return repository.findAllTotals();
+        return service.totals();
     }
 
     @GetMapping("/{id}/total")
     public ResponseEntity<ProcurementTotalResponse> total(@PathVariable UUID id) {
-        return ResponseEntity.of(repository.findTotalById(id));
+        return ResponseEntity.of(service.total(id));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ProcurementResponse> get(@PathVariable UUID id) {
-        return ResponseEntity.of(repository.findById(id));
+        return ResponseEntity.of(service.get(id));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<ProcurementResponse> update(
             @PathVariable UUID id, @Valid @RequestBody ProcurementRequest request) {
-        return ResponseEntity.of(repository.update(id, request.timestamp(), request.payeeId()));
+        return ResponseEntity.of(service.update(id, request));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
-        return repository.delete(id)
+        return service.delete(id)
                 ? ResponseEntity.noContent().build()
                 : ResponseEntity.notFound().build();
     }
