@@ -1,7 +1,7 @@
 # Pinned so the Compose project name stays "poc" regardless of the directory
 # this file lives in -- keeps container/volume names (poc-db-1, poc_db_data,
 # ...) stable now that the stack moved from poc/ to stack/.
-name: poc
+name: coffee-soul
 
 include:
   - db/docker-compose.yml
