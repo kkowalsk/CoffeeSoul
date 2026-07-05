@@ -137,6 +137,22 @@ export default function OrderView({
             ))}
           </Box>
         </Box>
+        {/* Each person's default brew, as a background reference -- independent
+            of the order being built below. Muted grey normally; when the
+            person's default happens to be the selected coffee, it switches to
+            the same active color as a real connection would. Rendered first
+            (and split the same way as the order-in-progress connections
+            below) so the order's own connections always sit on top. */}
+        <Diagram
+          connections={persons
+            .filter((comrade) => comrade.defaultBrewId && comrade.defaultBrewId !== coffee)
+            .map((comrade) => connection(comrade.defaultBrewId, comrade.id, { color: OTHER_LINE }))}
+        />
+        <Diagram
+          connections={persons
+            .filter((comrade) => comrade.defaultBrewId && comrade.defaultBrewId === coffee)
+            .map((comrade) => connection(comrade.defaultBrewId, comrade.id))}
+        />
         {/* Connections for OTHER (non-selected) coffees, in muted grey, so
             it's apparent who is already mapped elsewhere. Rendered first so
             the selected coffee's accent lines sit on top. */}

@@ -56,3 +56,5 @@
 
 >  lets rethink DefaultBrew. Instead of rendering the dropdown, the user must first click a Plus icon which then allows selection of brew. a Minus icon removes the selected default brew
     > getting closer, is there a way to open up the dropdown when the click is clicked so it saves the user a click
+
+> when the order page is loaded, iterate over the Persons array and create grey'ed connections between their default brews in the coffee buttons and their person buttons. when a coffee button is selected, re-render its connections with active/colored connection
