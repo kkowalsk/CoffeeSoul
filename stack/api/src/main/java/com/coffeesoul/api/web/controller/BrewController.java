@@ -1,8 +1,8 @@
-package com.coffeesoul.api.web;
+package com.coffeesoul.api.web.controller;
 
 import com.coffeesoul.api.domain.Brew;
-import com.coffeesoul.api.repository.BrewRepository;
 import com.coffeesoul.api.web.dto.BrewRequest;
+import com.coffeesoul.api.web.service.BrewService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,37 +22,36 @@ import java.util.UUID;
 @RequestMapping("/brews")
 public class BrewController {
 
-    private final BrewRepository repository;
+    private final BrewService service;
 
-    public BrewController(BrewRepository repository) {
-        this.repository = repository;
+    public BrewController(BrewService service) {
+        this.service = service;
     }
 
     @PostMapping
     public ResponseEntity<Brew> create(@Valid @RequestBody BrewRequest request) {
-        Brew created = repository.create(request.name(), request.price(), request.description());
+        Brew created = service.create(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     @GetMapping
     public List<Brew> list() {
-        return repository.findAll();
+        return service.list();
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Brew> get(@PathVariable UUID id) {
-        return ResponseEntity.of(repository.findById(id));
+        return ResponseEntity.of(service.get(id));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Brew> update(@PathVariable UUID id, @Valid @RequestBody BrewRequest request) {
-        return ResponseEntity.of(
-                repository.update(id, request.name(), request.price(), request.description()));
+        return ResponseEntity.of(service.update(id, request));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
-        return repository.delete(id)
+        return service.delete(id)
                 ? ResponseEntity.noContent().build()
                 : ResponseEntity.notFound().build();
     }

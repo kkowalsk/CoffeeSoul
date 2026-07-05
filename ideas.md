@@ -114,6 +114,7 @@ check in session / pay for session
 
 # TODOs
 [] checkout repo and double check steps listed in repo
+[] logging
 
 # Frontend
 * https://storybook.grommet.io/?path=/story/visualizations-diagram-animated--animated   -   draw upon toggle

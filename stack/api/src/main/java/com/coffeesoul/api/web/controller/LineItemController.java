@@ -1,8 +1,8 @@
-package com.coffeesoul.api.web;
+package com.coffeesoul.api.web.controller;
 
-import com.coffeesoul.api.repository.LineItemRepository;
 import com.coffeesoul.api.web.dto.LineItemRequest;
 import com.coffeesoul.api.web.dto.LineItemResponse;
+import com.coffeesoul.api.web.service.LineItemService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,39 +22,37 @@ import java.util.UUID;
 @RequestMapping("/line-items")
 public class LineItemController {
 
-    private final LineItemRepository repository;
+    private final LineItemService service;
 
-    public LineItemController(LineItemRepository repository) {
-        this.repository = repository;
+    public LineItemController(LineItemService service) {
+        this.service = service;
     }
 
     @PostMapping
     public ResponseEntity<LineItemResponse> create(@Valid @RequestBody LineItemRequest request) {
-        LineItemResponse created = repository.create(
-                request.procurementId(), request.comradeId(), request.brewId());
+        LineItemResponse created = service.create(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     @GetMapping
     public List<LineItemResponse> list() {
-        return repository.findAll();
+        return service.list();
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<LineItemResponse> get(@PathVariable UUID id) {
-        return ResponseEntity.of(repository.findById(id));
+        return ResponseEntity.of(service.get(id));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<LineItemResponse> update(
             @PathVariable UUID id, @Valid @RequestBody LineItemRequest request) {
-        return ResponseEntity.of(repository.update(
-                id, request.procurementId(), request.comradeId(), request.brewId()));
+        return ResponseEntity.of(service.update(id, request));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
-        return repository.delete(id)
+        return service.delete(id)
                 ? ResponseEntity.noContent().build()
                 : ResponseEntity.notFound().build();
     }
