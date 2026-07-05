@@ -61,6 +61,8 @@ const AppBar = (props) => (
 
 // draw-in animation duration (ms) for a newly created connection
 const DRAW_MS = 1000;
+// muted grey for connections belonging to non-selected coffees
+const OTHER_LINE = 'rgba(120, 120, 120, 0.35)';
 
 // A single mappable option box. Its `id` is what <Diagram> connections point at
 // (fromTarget / toTarget), and it doubles as the click target.
@@ -181,6 +183,14 @@ function App() {
                 ))}
               </Box>
             </Box>
+            {/* Connections for OTHER (non-selected) coffees, in muted grey, so
+                it's apparent who is already mapped elsewhere. Rendered first so
+                the selected coffee's accent lines sit on top. */}
+            <Diagram
+              connections={connections
+                .filter((c) => c.fromTarget !== coffee)
+                .map((c) => ({ ...c, color: OTHER_LINE }))}
+            />
             {/* Established lines for the selected coffee, WITHOUT animation, so
                 they never redraw when the connection set changes. The line
                 currently animating in is excluded here (the animated Diagram
