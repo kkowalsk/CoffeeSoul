@@ -1,5 +1,5 @@
-import React from 'react';
-import { Accordion, AccordionPanel, Box, Heading } from 'grommet';
+import React, { useState } from 'react';
+import { Accordion, AccordionPanel, Box, Heading, Text } from 'grommet';
 import ProcurementView from './ProcurementView';
 
 // The "History" tab: one accordion panel per procurement, newest first. The
@@ -17,17 +17,30 @@ export default function HistoryView({ procurements, persons, coffees, lineItems 
     (a, b) => new Date(b.timestamp) - new Date(a.timestamp),
   );
 
+  // Controlling the Accordion ourselves (rather than leaving it uncontrolled)
+  // is what lets the label know whether ITS OWN panel is the expanded one,
+  // so the grey background can extend to the title row, not just the body.
+  const [activeIndexes, setActiveIndexes] = useState([]);
+
   return (
     <Box pad="medium">
-      <Accordion>
-        {newestFirst.map((procurement) => (
-          <AccordionPanel key={procurement.id} label={panelLabel(procurement, persons)}>
-            <ProcurementView
-              procurement={procurement}
-              persons={persons}
-              coffees={coffees}
-              lineItems={lineItems}
-            />
+      <Accordion gap="small" activeIndex={activeIndexes} onActive={setActiveIndexes}>
+        {newestFirst.map((procurement, index) => (
+          <AccordionPanel
+            key={procurement.id}
+            label={panelLabel(procurement, persons, activeIndexes.includes(index))}
+          >
+            {/* This Box only renders while the panel is expanded (AccordionPanel
+                unmounts its children when collapsed), so the background only
+                shows up on whichever panel is currently open. */}
+            <Box background="light-2">
+              <ProcurementView
+                procurement={procurement}
+                persons={persons}
+                coffees={coffees}
+                lineItems={lineItems}
+              />
+            </Box>
           </AccordionPanel>
         ))}
       </Accordion>
@@ -41,13 +54,20 @@ export default function HistoryView({ procurements, persons, coffees, lineItems 
 // the accordion's look, we rebuild that same Box/Heading treatment by hand
 // (theme.accordion.label.container.pad and theme.accordion.heading.level in
 // the default grommet theme) rather than substituting in plain Text.
-const panelLabel = (procurement, persons) => {
+const panelLabel = (procurement, persons, isActive) => {
   const date = procurement.timestamp ? new Date(procurement.timestamp).toLocaleString() : 'Unknown time';
   const payeeName = persons.find((p) => p.id === procurement.payeeId)?.name ?? 'Unassigned';
   return (
-    <Box pad={{ horizontal: 'xsmall' }} gap="xxsmall">
+    <Box
+      fill="horizontal"
+      pad={{ horizontal: 'xsmall' }}
+      gap="xxsmall"
+      background={isActive ? 'light-2' : undefined}
+    >
       <Heading level={4} margin="none">{`Order ${procurement.orderNumber} @ ${date}`}</Heading>
-      <Heading level={4} margin="none">{`Payee: ${payeeName}`}</Heading>
+      <Heading level={4} margin="none">
+        Payee: {isActive ? <Text color="#01A982">{payeeName}</Text> : payeeName}
+      </Heading>
     </Box>
   );
 };

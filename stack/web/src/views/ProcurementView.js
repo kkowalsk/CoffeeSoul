@@ -28,7 +28,7 @@ export default function ProcurementView({ procurement, persons, coffees, lineIte
       property: 'person',
       header: 'Person',
       primary: true,
-      footer: <b><Text color="#01A982">{payeeName}</Text></b>,
+      // footer: <b><Text color="#01A982">{payeeName}</Text></b>,
     },
     { property: 'brew', header: 'Brew' },
     {
