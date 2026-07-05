@@ -62,6 +62,15 @@ const theme = {
     pad: { horizontal: 'small', vertical: 'small' },
     margin: { vertical: 'xsmall', horizontal: 'medium' },
   },
+  // Grommet's default FormField insets its label by a 'small' horizontal
+  // margin but not the input/select below it, so a plain TextInput/Select
+  // renders flush-left while its label sits 12px in -- misaligning every
+  // form in the app. Zero it so the label sits directly above its field.
+  formField: {
+    label: {
+      margin: { horizontal: 'none' },
+    },
+  },
 };
 
 const AppBar = (props) => (
