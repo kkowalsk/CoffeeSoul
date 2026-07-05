@@ -103,7 +103,7 @@ check in session / pay for session
 | 06/30/2026 | planning <br> code kick off | python poc <br> initial documentation | ~4 |
 | 07/01/2026 | PoC completed <br> containerized <br> persistence | PoC completed | ~3-4 |
 | 07/02/2026 | UI PoC <br> cloud hosted | containerized <br> persistence <br> secrets management | ~4 |
-| 07/03/2026 | group changes <br> multi-user | | |
+| 07/03/2026 | group changes <br> multi-user | repo restructuring <br> UI component added | |
 | 07/04/2026 | day off | | |
 | 07/05/2026 | metrics <br> android | | |
 | 07/06/2026 | share it 🚀 | | |

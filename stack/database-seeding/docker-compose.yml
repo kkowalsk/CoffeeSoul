@@ -1,11 +1,10 @@
 services:
   database-seeding:
     build: .
-    # waits for the microservice, not just the db: the microservice's Flyway
-    # migrations create the schema this seeder inserts into, so it must run
-    # after the app is healthy.
+    # waits for the api, not just the db: the api's Flyway migrations create the
+    # schema this seeder inserts into, so it must run after the app is healthy.
     depends_on:
-      microservice:
+      api:
         condition: service_healthy
     environment:
       POSTGRES_HOST: db

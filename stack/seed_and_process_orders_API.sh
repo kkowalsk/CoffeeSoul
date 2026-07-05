@@ -4,7 +4,7 @@
 # directly:
 #   1. seed the brews   (from database-seeding/seedData/brews.json)
 #   2. seed the comrades (from database-seeding/seedData/comrades.json)
-#   3. process the first N orders (from microservice/seedData/orders_mixed.json)
+#   3. process the first N orders (from api/seedData/orders_mixed.json)
 #      -- each order becomes a procurement plus its line items.
 #
 # poc.py additionally assigns each procurement a payee via
@@ -35,7 +35,7 @@ NUM_ORDERS="${NUM_ORDERS:-10}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BREWS_JSON="$SCRIPT_DIR/database-seeding/seedData/brews.json"
 COMRADES_JSON="$SCRIPT_DIR/database-seeding/seedData/comrades.json"
-ORDERS_JSON="$SCRIPT_DIR/microservice/seedData/orders_mixed.json"
+ORDERS_JSON="$SCRIPT_DIR/api/seedData/orders_mixed.json"
 
 # name -> uuid maps, populated from POST responses
 declare -A BREW_ID
