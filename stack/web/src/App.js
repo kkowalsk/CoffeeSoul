@@ -92,6 +92,9 @@ function App() {
   // The single connection currently animating in; cleared once its draw
   // finishes so it hands off to the static (non-animating) layer.
   const [drawing, setDrawing] = useState(null);
+  // Name of whoever the weighted round robin picked to pay for the most
+  // recently finalized order; cleared when a new order starts.
+  const [payee, setPayee] = useState(null);
   const flip = flipConnection(setConnections);
 
   useEffect(() => {
@@ -118,10 +121,12 @@ function App() {
   };
 
   // "Place Order": create an Order (procurement), then a LineItem per connection
-  // (coffee = brew = fromTarget, person = comrade = toTarget), then clear.
+  // (coffee = brew = fromTarget, person = comrade = toTarget), then finalize it
+  // so the weighted round robin picks a payee.
   const placeOrder = async () => {
     if (connections.length === 0) return;
     console.log('placing order for connections:', connections);
+    setPayee(null);
     const order = await postJson('/procurements', {});
     await Promise.all(
       connections.map((c) =>
@@ -132,7 +137,9 @@ function App() {
         }),
       ),
     );
-    console.log('order placed:', order.id);
+    const finalized = await postJson(`/procurements/${order.id}/finalize`, {});
+    console.log('order placed:', order.id, 'payee:', finalized.payeeId);
+    setPayee(persons.find((p) => p.id === finalized.payeeId)?.name ?? null);
     setConnections([]);
   };
 
@@ -221,6 +228,11 @@ function App() {
           </Stack>
 
           <BusyButton onOrder={placeOrder} />
+          {payee && (
+            <Box align="center" pad={{ bottom: 'medium' }}>
+              <Text weight="bold">{payee} is buying this round!</Text>
+            </Box>
+          )}
         </PageContent>
       </Page>
       <Footer background="background-back" pad="small" justify="center">

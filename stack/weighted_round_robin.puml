@@ -1,0 +1,50 @@
+@startuml
+
+participant "web" as web
+participant "Procurement Controller" as pc
+participant "Procurement Service" as ps
+participant "LineItem Controller" as lc
+participant "LineItem Service" as ls
+participant "WeightedRoundRobinService" as rrs
+participant "Repos..." as rp
+participant "Postgres" as psql
+
+
+== container start up ==
+
+rrs -> rp : load weighted round robin entry
+rp -> psql : select row
+alt row doesnt exist
+rrs -> rp : create new weighted round robin 
+rp -> psql : insert row
+end alt
+rrs -> rrs : store WeightedRR uuid in memory
+rrs -> rp : lookup existing procurements
+rp -> psql : query
+rrs -> rrs : build in-memory representation of historical procurements 
+
+== Finalize Order ==
+
+web -> web : submit order button clicked
+web -> pc : create order
+pc -> ps : create
+ps -> rp : create
+rp -> psql : insert
+pc --> web : order id
+alt for each line item with order id
+web -> lc : create line item
+lc -> ls : create
+ls -> rp : create
+rp -> psql : insert 
+end alt 
+web -> pc : finalize order
+pc -> ps : finalize
+ps -> rrs : finalize 
+rrs -> rrs : calculate total
+rrs -> rrs : determine payee
+rrs --> ps : finalized order (payee set and weighted round robin uuid = in memory stored uuid)
+ps -> rp : set payee and weighted round robin uuid
+pc --> web : payee 
+
+
+@enduml

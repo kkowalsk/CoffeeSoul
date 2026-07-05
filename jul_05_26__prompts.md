@@ -27,3 +27,15 @@
 > extract businesslogic from Controllers to Services in API
 
 > using LoggerFactory, add logging for ever request in Services
+
+> the API and web page are connected. time to implement the WeightedRoundRobin logic found in poc.py. see sequence diagram outlined in weighted_round_robin.puml. ask clarifying questions
+    >  User answered Claude's questions:
+        · The sequence diagram's startup section only loads/creates a single round-robin UUID row — it doesn't replay historical procurements. Should comrade weight totals live purely in memory (reset to zero every time the API restarts), or should the service rebuild weights from all past finalized procurements at startup? → Rebuild from DB history at startup
+        · The diagram shows 'web -> pc: finalize order' as an explicit step after all line items are created. How far should this task go on the frontend? → Full end-to-end (Recommended)
+        · What should happen if finalize is called on a procurement that already has a payee set (e.g. duplicate request, or retry)? → Reject with a conflict (Recommended)
+
+
+> update icon to be coffee-cup.png and attribute in a footer using this
+
+  <a href="https://www.flaticon.com/free-icons/coffee" title="coffee icons">Coffee icons created by Freepik - Flaticon</a>
+
