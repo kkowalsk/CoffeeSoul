@@ -62,6 +62,15 @@ const theme = {
     pad: { horizontal: 'small', vertical: 'small' },
     margin: { vertical: 'xsmall', horizontal: 'medium' },
   },
+  // Grommet's default FormField insets its label by a 'small' horizontal
+  // margin but not the input/select below it, so a plain TextInput/Select
+  // renders flush-left while its label sits 12px in -- misaligning every
+  // form in the app. Zero it so the label sits directly above its field.
+  formField: {
+    label: {
+      margin: { horizontal: 'none' },
+    },
+  },
 };
 
 const AppBar = (props) => (
@@ -135,6 +144,13 @@ function App() {
     setConnections([]);
   };
 
+  // Add a new coffee comrade, then append it to the loaded list so the
+  // People tab's card grid picks it up without a refetch.
+  const createPerson = async ({ name, defaultBrewId }) => {
+    const created = await postJson('/coffee-comrades', { name, defaultBrewId });
+    setPersons((prev) => [...prev, created]);
+  };
+
   return (
     <Grommet theme={theme} full>
       <AppBar>
@@ -173,7 +189,7 @@ function App() {
               // title={<Text size="large">People</Text>}
               icon={<img src="/people.png" alt="" width={TAB_ICON_SIZE} height={TAB_ICON_SIZE} />}
             >
-              <PeopleView />
+              <PeopleView persons={persons} coffees={coffees} onCreatePerson={createPerson} />
             </Tab>
             <Tab
               // title={<Text size="large">Drinks</Text>}

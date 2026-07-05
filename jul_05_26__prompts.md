@@ -47,3 +47,12 @@
 
 
 > refactor App.js to extract the 4 tabs into views stored in separate files
+
+> using the stubbed out PeopleView.js, render existing people in card layout and add "create new person" form at bottom
+  1) re-use loaded people/brew data from App.js (i.e. pass into creation of view)
+  2) default brew may be null
+  3) stubbing utilized storybook from https://storybook.grommet.io/
+  4) icons added under public/
+
+>  lets rethink DefaultBrew. Instead of rendering the dropdown, the user must first click a Plus icon which then allows selection of brew. a Minus icon removes the selected default brew
+    > getting closer, is there a way to open up the dropdown when the click is clicked so it saves the user a click
