@@ -15,7 +15,7 @@
 #
 # Usage:
 #   ./reset_data.sh          truncate all data (schema preserved)
-#   ./reset_data.sh --seed   truncate, then re-run database-seeding to
+#   ./reset_data.sh --seed   truncate, then re-run db-seeding to
 #                            repopulate the reference brews/comrades
 #
 # Requires: the db service to be up (docker compose up -d db).
@@ -59,5 +59,5 @@ if [ "$SEED" -eq 1 ]; then
     # container rather than requiring them in the caller's environment.
     U=$(compose exec -T db printenv POSTGRES_USER | tr -d '\r')
     P=$(compose exec -T db printenv POSTGRES_PASSWORD | tr -d '\r')
-    POSTGRES_USER="$U" POSTGRES_PASSWORD="$P" compose run --rm database-seeding
+    POSTGRES_USER="$U" POSTGRES_PASSWORD="$P" compose run --rm db-seeding
 fi

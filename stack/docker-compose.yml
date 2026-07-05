@@ -5,7 +5,7 @@ name: poc
 
 include:
   - db/docker-compose.yml
-  - database-seeding/docker-compose.yml
+  - db-seeding/docker-compose.yml
   - api/docker-compose.yml
   - web/docker-compose.yml
   - infisical/docker-compose.yml

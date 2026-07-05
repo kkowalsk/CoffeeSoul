@@ -1,5 +1,5 @@
 services:
-  database-seeding:
+  db-seeding:
     build: .
     # waits for the api, not just the db: the api's Flyway migrations create the
     # schema this seeder inserts into, so it must run after the app is healthy.
