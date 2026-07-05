@@ -58,3 +58,10 @@
     > getting closer, is there a way to open up the dropdown when the click is clicked so it saves the user a click
 
 > when the order page is loaded, iterate over the Persons array and create grey'ed connections between their default brews in the coffee buttons and their person buttons. when a coffee button is selected, re-render its connections with active/colored connection
+
+
+> using the stubbed out BrewsView.js, render existing brews in card layout and add "create new brew" form at bottom
+  1) re-use loaded brew data from App.js (i.e. pass into creation of view)
+  2) description may be null | empty
+  3) stubbing utilized storybook from https://storybook.grommet.io/
+  4) icons added under public/
