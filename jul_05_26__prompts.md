@@ -65,3 +65,9 @@
   2) description may be null | empty
   3) stubbing utilized storybook from https://storybook.grommet.io/
   4) icons added under public/
+
+
+> using the stubbed out HistoryView.js, render existing history
+  1) invoke API and load data in App.js for list of Procurements
+  2) pass into HistoryView instantiation
+  3) use stubbed out ProcurementView.js
