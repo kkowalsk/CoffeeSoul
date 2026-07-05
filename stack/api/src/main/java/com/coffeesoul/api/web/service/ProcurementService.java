@@ -1,16 +1,24 @@
 package com.coffeesoul.api.web.service;
 
+import com.coffeesoul.api.repository.LineItemRepository;
+import com.coffeesoul.api.repository.LineItemRepository.ComradeAmount;
 import com.coffeesoul.api.repository.ProcurementRepository;
 import com.coffeesoul.api.web.dto.ProcurementRequest;
 import com.coffeesoul.api.web.dto.ProcurementResponse;
 import com.coffeesoul.api.web.dto.ProcurementTotalResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
+import java.math.BigDecimal;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class ProcurementService {
@@ -18,9 +26,16 @@ public class ProcurementService {
     Logger log = LoggerFactory.getLogger(this.getClass());
 
     private final ProcurementRepository repository;
+    private final LineItemRepository lineItemRepository;
+    private final WeightedRoundRobinService roundRobinService;
 
-    public ProcurementService(ProcurementRepository repository) {
+    public ProcurementService(
+            ProcurementRepository repository,
+            LineItemRepository lineItemRepository,
+            WeightedRoundRobinService roundRobinService) {
         this.repository = repository;
+        this.lineItemRepository = lineItemRepository;
+        this.roundRobinService = roundRobinService;
     }
 
     public ProcurementResponse create(ProcurementRequest request) {
@@ -56,5 +71,29 @@ public class ProcurementService {
     public boolean delete(UUID id) {
         log.info("delete request: id={}", id);
         return repository.delete(id);
+    }
+
+    // Runs this procurement's line items through the weighted round robin to
+    // pick a payee, then persists that payee alongside the round robin's id.
+    // See stack/weighted_round_robin.puml ("Finalize Order").
+    public ProcurementResponse finalize(UUID id) {
+        log.info("finalize request: id={}", id);
+        ProcurementResponse procurement = repository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "procurement not found"));
+        if (procurement.payeeId() != null) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "procurement already finalized");
+        }
+
+        Map<UUID, BigDecimal> amountsByComrade = lineItemRepository.findAmountsByComradeForProcurement(id).stream()
+                .collect(Collectors.toMap(
+                        ComradeAmount::comradeId, ComradeAmount::amount, (a, b) -> a, LinkedHashMap::new));
+        if (amountsByComrade.isEmpty()) {
+            throw new ResponseStatusException(
+                    HttpStatus.UNPROCESSABLE_ENTITY, "cannot finalize an order with no line items");
+        }
+
+        UUID payeeId = roundRobinService.finalizeOrder(amountsByComrade);
+        return repository.finalize(id, payeeId, roundRobinService.getRoundRobinId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "procurement not found"));
     }
 }

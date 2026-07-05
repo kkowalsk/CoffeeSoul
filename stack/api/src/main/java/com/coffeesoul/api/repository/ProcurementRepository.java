@@ -70,6 +70,23 @@ public class ProcurementRepository {
         return jdbc.update("DELETE FROM procurement WHERE id = ?", id) > 0;
     }
 
+    // procurements that have already gone through WeightedRoundRobinService's
+    // finalize step, oldest first -- used to replay history and rebuild
+    // in-memory comrade weights on startup.
+    public List<ProcurementResponse> findAllFinalized() {
+        return jdbc.query(
+                "SELECT id, \"timestamp\", payee_id, round_robin_id FROM procurement "
+                        + "WHERE payee_id IS NOT NULL ORDER BY \"timestamp\"",
+                ROW_MAPPER);
+    }
+
+    public Optional<ProcurementResponse> finalize(UUID id, UUID payeeId, UUID roundRobinId) {
+        return jdbc.query(
+                "UPDATE procurement SET payee_id = ?, round_robin_id = ? WHERE id = ? "
+                        + "RETURNING id, \"timestamp\", payee_id, round_robin_id",
+                ROW_MAPPER, payeeId, roundRobinId, id).stream().findFirst();
+    }
+
     public List<ProcurementTotalResponse> findAllTotals() {
         return jdbc.query(
                 "SELECT procurement_id, total FROM v_procurement_total ORDER BY procurement_id",

@@ -71,4 +71,11 @@ public class ProcurementController {
                 ? ResponseEntity.noContent().build()
                 : ResponseEntity.notFound().build();
     }
+
+    // runs the weighted round robin and sets the payee; see
+    // stack/weighted_round_robin.puml.
+    @PostMapping("/{id}/finalize")
+    public ProcurementResponse finalize(@PathVariable UUID id) {
+        return service.finalize(id);
+    }
 }
