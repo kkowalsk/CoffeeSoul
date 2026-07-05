@@ -5,3 +5,14 @@
 
 > Goal: map the Coffee option Toggle element to the Person option Toggle element. draw connections (lines) between the specific toggle option boxes. One coffee option may map to 0..* Person options.
   define re-useable function that is passed to Toggle.onToggle() that creates a new connection or deletes the current one (flips the previous state)
+
+
+> utilizing the Grommet animated example, render an animation when new connections are created between a coffee and person
+  here's the animated example
+
+    > can only new connections be drawn when person selected? i.e. not re-render the existing connections
+    > yes, implement caveat fix
+    > it's a bit buggy, rollback this change to first version
+        > no, keep the first "only animate new connections" code
+
+> when the <BusyButton> element is clicked, note the existing connections (print them to console) then clear all existing connections. this will be utilized to make API calls soon

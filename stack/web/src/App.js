@@ -40,6 +40,8 @@ const AppBar = (props) => (
 
 const COFFEES = ['Coffee1', 'Coffee2', 'Coffee3'];
 const PERSONS = ['Person1', 'Person2', 'Person3'];
+// draw-in animation duration (ms) for a newly created connection
+const DRAW_MS = 1000;
 
 // A single mappable option box. Its `id` is what <Diagram> connections point at
 // (fromTarget / toTarget), and it doubles as the click target.
@@ -62,10 +64,33 @@ function App() {
   const [connections, setConnections] = useState([]);
   // The coffee currently being edited (the "from" side).
   const [coffee, setCoffee] = useState();
+  // The single connection currently animating in; cleared once its draw
+  // finishes so it hands off to the static (non-animating) layer.
+  const [drawing, setDrawing] = useState(null);
   const flip = flipConnection(setConnections);
 
   const isConnected = (coffeeId, personId) =>
     connections.some((c) => c.fromTarget === coffeeId && c.toTarget === personId);
+
+  // Map/unmap a person to the selected coffee. On CREATE only, flag the new
+  // connection as "drawing" for DRAW_MS so ONLY it animates in -- established
+  // lines (rendered by the static Diagram) are left untouched.
+  const selectPerson = (personId) => {
+    if (!coffee) return;
+    const removing = isConnected(coffee, personId);
+    flip(coffee, personId);
+    if (!removing) {
+      setDrawing(connection(coffee, personId));
+      setTimeout(() => setDrawing(null), DRAW_MS);
+    }
+  };
+
+  // "Place Order": note the current connections (soon to become an API call)
+  // then clear them so the board resets for the next order.
+  const placeOrder = () => {
+    console.log('placing order for connections:', connections);
+    setConnections([]);
+  };
 
   return (
     <Grommet theme={theme} full>
@@ -110,24 +135,44 @@ function App() {
                     id={p}
                     label={p}
                     active={!!coffee && isConnected(coffee, p)}
-                    onClick={() => coffee && flip(coffee, p)}
+                    onClick={() => selectPerson(p)}
                   />
                 ))}
               </Box>
             </Box>
-            {/* only draw lines for the selected coffee; the full `connections`
-                data is preserved, so switching back re-renders its lines */}
-            <Diagram connections={connections.filter((c) => c.fromTarget === coffee)} />
+            {/* Established lines for the selected coffee, WITHOUT animation, so
+                they never redraw when the connection set changes. The line
+                currently animating in is excluded here (the animated Diagram
+                below owns it) until its draw finishes. */}
+            <Diagram
+              connections={connections.filter(
+                (c) =>
+                  c.fromTarget === coffee &&
+                  !(
+                    drawing &&
+                    drawing.fromTarget === c.fromTarget &&
+                    drawing.toTarget === c.toTarget
+                  ),
+              )}
+            />
+            {/* Only the just-created connection, drawn in via Grommet's "draw"
+                animation, then handed back to the static layer above. */}
+            {drawing && drawing.fromTarget === coffee && (
+              <Diagram
+                animation={{ type: 'draw', duration: DRAW_MS }}
+                connections={[drawing]}
+              />
+            )}
           </Stack>
 
-          <BusyButton />
+          <BusyButton onOrder={placeOrder} />
         </PageContent>
       </Page>
     </Grommet>
   );
 }
 
-export const BusyButton = () => {
+export const BusyButton = ({ onOrder }) => {
   const [busy, setBusy] = useState();
   const [success, setSuccess] = useState();
 
@@ -139,6 +184,7 @@ export const BusyButton = () => {
       success={success}
       label="Place Order"
       onClick={() => {
+        onOrder?.();
         setBusy(true);
         setTimeout(() => {
           setBusy(false);
