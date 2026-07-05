@@ -11,6 +11,8 @@ import {
   Page,
   PageContent,
   Paragraph,
+  Tab,
+  Tabs,
   Text,
   ToggleGroup,
   Diagram,
@@ -38,6 +40,10 @@ async function postJson(path, body) {
   return res.json();
 }
 
+// tab icon pixel size, shared so the four <img> icons + the theme's tab-row
+// gap/padding stay proportional if this changes.
+const TAB_ICON_SIZE = 56;
+
 const theme = {
   global: {
     colors: {
@@ -48,6 +54,13 @@ const theme = {
       size: "18px",
       height: "20px",
     },
+  },
+  // Tab/Tabs have no size prop -- this is the only way to make the tab row
+  // (icon-to-text gap + hit-area padding) bigger.
+  tab: {
+    gap: 'medium',
+    pad: { horizontal: 'small', vertical: 'small' },
+    margin: { vertical: 'xsmall', horizontal: 'medium' },
   },
 };
 
@@ -153,86 +166,112 @@ function App() {
       </AppBar>
       <Page pad={{ vertical: 'medium' }} kind='narrow' background="background-back">
         <PageContent background="background-front">
-          <Box direction="row" justify="between" pad={{ vertical: 'medium' }}>
+          {/* <Box direction="row" justify="between" pad={{ vertical: 'medium' }}>
             <Heading margin="none">
               Title
             </Heading>
-          </Box>
-          <Paragraph>
-            Pick a coffee on the left, then toggle people on the right to connect
-            them. Each coffee can map to 0..* people.
-          </Paragraph>
+          </Box> */}
 
-          {/* interactiveChild="first" -> the boxes get the clicks; the Diagram
-              overlay is set to pointer-events:none so it no longer swallows them */}
-          <Stack interactiveChild="first">
-            <Box
-              direction="row"
-              justify="between"
-              pad={{ horizontal: 'xlarge', vertical: 'medium' }}
+          <Tabs>
+            <Tab
+              // title={<Text size="large">Order</Text>}
+              icon={<img src="/online-order.png" alt="" width={TAB_ICON_SIZE} height={TAB_ICON_SIZE} />}
             >
-              <Box gap="medium">
-                {coffees.map((brew) => (
-                  <OptionBox
-                    key={brew.id}
-                    id={brew.id}
-                    label={brew.name}
-                    active={coffee === brew.id}
-                    onClick={() => setCoffee(brew.id)}
-                  />
-                ))}
-              </Box>
-              <Box gap="medium">
-                {persons.map((comrade) => (
-                  <OptionBox
-                    key={comrade.id}
-                    id={comrade.id}
-                    label={comrade.name}
-                    active={!!coffee && isConnected(coffee, comrade.id)}
-                    onClick={() => selectPerson(comrade.id)}
-                  />
-                ))}
-              </Box>
-            </Box>
-            {/* Connections for OTHER (non-selected) coffees, in muted grey, so
-                it's apparent who is already mapped elsewhere. Rendered first so
-                the selected coffee's accent lines sit on top. */}
-            <Diagram
-              connections={connections
-                .filter((c) => c.fromTarget !== coffee)
-                .map((c) => ({ ...c, color: OTHER_LINE }))}
-            />
-            {/* Established lines for the selected coffee, WITHOUT animation, so
-                they never redraw when the connection set changes. The line
-                currently animating in is excluded here (the animated Diagram
-                below owns it) until its draw finishes. */}
-            <Diagram
-              connections={connections.filter(
-                (c) =>
-                  c.fromTarget === coffee &&
-                  !(
-                    drawing &&
-                    drawing.fromTarget === c.fromTarget &&
-                    drawing.toTarget === c.toTarget
-                  ),
-              )}
-            />
-            {/* Only the just-created connection, drawn in via Grommet's "draw"
-                animation, then handed back to the static layer above. */}
-            {drawing && drawing.fromTarget === coffee && (
-              <Diagram
-                animation={{ type: 'draw', duration: DRAW_MS }}
-                connections={[drawing]}
-              />
-            )}
-          </Stack>
+              <Paragraph>
+                Pick a coffee on the left, then toggle people on the right to connect
+                them. Each coffee can map to 0..* people.
+              </Paragraph>
 
-          <BusyButton onOrder={placeOrder} />
-          {payee && (
-            <Box align="center" pad={{ bottom: 'medium' }}>
-              <Text weight="bold">{payee} is buying this round!</Text>
-            </Box>
-          )}
+              {/* interactiveChild="first" -> the boxes get the clicks; the Diagram
+                  overlay is set to pointer-events:none so it no longer swallows them */}
+              <Stack interactiveChild="first">
+                <Box
+                  direction="row"
+                  justify="between"
+                  pad={{ horizontal: 'xlarge', vertical: 'medium' }}
+                >
+                  <Box gap="medium">
+                    {coffees.map((brew) => (
+                      <OptionBox
+                        key={brew.id}
+                        id={brew.id}
+                        label={brew.name}
+                        active={coffee === brew.id}
+                        onClick={() => setCoffee(brew.id)}
+                      />
+                    ))}
+                  </Box>
+                  <Box gap="medium">
+                    {persons.map((comrade) => (
+                      <OptionBox
+                        key={comrade.id}
+                        id={comrade.id}
+                        label={comrade.name}
+                        active={!!coffee && isConnected(coffee, comrade.id)}
+                        onClick={() => selectPerson(comrade.id)}
+                      />
+                    ))}
+                  </Box>
+                </Box>
+                {/* Connections for OTHER (non-selected) coffees, in muted grey, so
+                    it's apparent who is already mapped elsewhere. Rendered first so
+                    the selected coffee's accent lines sit on top. */}
+                <Diagram
+                  connections={connections
+                    .filter((c) => c.fromTarget !== coffee)
+                    .map((c) => ({ ...c, color: OTHER_LINE }))}
+                />
+                {/* Established lines for the selected coffee, WITHOUT animation, so
+                    they never redraw when the connection set changes. The line
+                    currently animating in is excluded here (the animated Diagram
+                    below owns it) until its draw finishes. */}
+                <Diagram
+                  connections={connections.filter(
+                    (c) =>
+                      c.fromTarget === coffee &&
+                      !(
+                        drawing &&
+                        drawing.fromTarget === c.fromTarget &&
+                        drawing.toTarget === c.toTarget
+                      ),
+                  )}
+                />
+                {/* Only the just-created connection, drawn in via Grommet's "draw"
+                    animation, then handed back to the static layer above. */}
+                {drawing && drawing.fromTarget === coffee && (
+                  <Diagram
+                    animation={{ type: 'draw', duration: DRAW_MS }}
+                    connections={[drawing]}
+                  />
+                )}
+              </Stack>
+
+              <BusyButton onOrder={placeOrder} />
+              {payee && (
+                <Box align="center" pad={{ bottom: 'medium' }}>
+                  <Text weight="bold">{payee} is buying this round!</Text>
+                </Box>
+              )}
+            </Tab>
+            <Tab
+              // title={<Text size="large">People</Text>}
+              icon={<img src="/people.png" alt="" width={TAB_ICON_SIZE} height={TAB_ICON_SIZE} />}
+            >
+
+            </Tab>
+            <Tab
+              // title={<Text size="large">Drinks</Text>}
+              icon={<img src="/coffee-cup.png" alt="" width={TAB_ICON_SIZE} height={TAB_ICON_SIZE} />}
+            >
+
+            </Tab>
+            <Tab
+              // title={<Text size="large">Metrics</Text>}
+              icon={<img src="/benchmarking.png" alt="" width={TAB_ICON_SIZE} height={TAB_ICON_SIZE} />}
+            >
+
+            </Tab>
+          </Tabs>          
         </PageContent>
       </Page>
       <Footer background="background-back" pad="small" justify="center">
