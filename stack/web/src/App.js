@@ -1,15 +1,16 @@
 import
   React,
   { useState, useReducer, useEffect } from 'react';
-import { 
+import {
   Box,
   Button,
+  Footer,
   Grommet,
   Header,
   Heading,
   Page,
-  PageContent, 
-  Paragraph, 
+  PageContent,
+  Paragraph,
   Text,
   ToggleGroup,
   Diagram,
@@ -138,7 +139,10 @@ function App() {
   return (
     <Grommet theme={theme} full>
       <AppBar>
-        <Text size="large">Coffee Soul</Text>
+        <Box direction="row" align="center" gap="small">
+          <img src="/coffee-cup.png" alt="" width="28" height="28" />
+          <Text size="large">Coffee Soul</Text>
+        </Box>
       </AppBar>
       <Page pad={{ vertical: 'medium' }} kind='narrow' background="background-back">
         <PageContent background="background-front">
@@ -219,6 +223,13 @@ function App() {
           <BusyButton onOrder={placeOrder} />
         </PageContent>
       </Page>
+      <Footer background="background-back" pad="small" justify="center">
+        <Text size="xsmall">
+          <a href="https://www.flaticon.com/free-icons/coffee" title="coffee icons">
+            Coffee icons created by Freepik - Flaticon
+          </a>
+        </Text>
+      </Footer>
     </Grommet>
   );
 }
