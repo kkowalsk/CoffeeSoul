@@ -95,7 +95,7 @@ export default function PeopleView({ persons, coffees, onCreatePerson }) {
                 <Button
                   plain
                   a11yTitle="Remove default brew"
-                  icon={<img src="/minus.png" alt="" width={36} height={36} />}
+                  icon={<img src="/minus2.png" alt="" width={36} height={36} />}
                   onClick={clearDefaultBrew}
                 />
               </Box>
