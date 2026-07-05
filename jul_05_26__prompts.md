@@ -47,3 +47,9 @@
 
 
 > refactor App.js to extract the 4 tabs into views stored in separate files
+
+> using the stubbed out PeopleView.js, render existing people in card layout and add "create new person" form at bottom
+  1) re-use loaded people/brew data from App.js (i.e. pass into creation of view)
+  2) default brew may be null
+  3) stubbing utilized storybook from https://storybook.grommet.io/
+  4) icons added under public/
