@@ -44,3 +44,6 @@
   1) people = people.png
   2) drinks = coffee-cup.png
   3) metrics = benchmarking.png
+
+
+> refactor App.js to extract the 4 tabs into views stored in separate files
