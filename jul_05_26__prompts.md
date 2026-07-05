@@ -21,3 +21,5 @@
   1) coffee options should be dynamically created from existing coffees retrieved from API
   2) persons options should be dynamically created from existing coffee_comrades retrieved from API
   3) clicking "place order" busy button should make API calls to submit an Order with LineItems
+
+> ui improvement: render existing Coffee--Person connections for non-selected coffee in a slightly transparent grey so it's apparent what other people have selected for their coffee
