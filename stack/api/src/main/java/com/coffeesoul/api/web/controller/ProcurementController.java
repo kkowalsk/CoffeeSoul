@@ -1,4 +1,4 @@
-package com.coffeesoul.api.web;
+package com.coffeesoul.api.web.controller;
 
 import com.coffeesoul.api.repository.ProcurementRepository;
 import com.coffeesoul.api.web.dto.ProcurementRequest;

@@ -1,8 +1,8 @@
-package com.coffeesoul.api.web;
+package com.coffeesoul.api.web.controller;
 
-import com.coffeesoul.api.repository.CoffeeComradeRepository;
-import com.coffeesoul.api.web.dto.CoffeeComradeRequest;
-import com.coffeesoul.api.web.dto.CoffeeComradeResponse;
+import com.coffeesoul.api.repository.LineItemRepository;
+import com.coffeesoul.api.web.dto.LineItemRequest;
+import com.coffeesoul.api.web.dto.LineItemResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,35 +19,37 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/coffee-comrades")
-public class CoffeeComradeController {
+@RequestMapping("/line-items")
+public class LineItemController {
 
-    private final CoffeeComradeRepository repository;
+    private final LineItemRepository repository;
 
-    public CoffeeComradeController(CoffeeComradeRepository repository) {
+    public LineItemController(LineItemRepository repository) {
         this.repository = repository;
     }
 
     @PostMapping
-    public ResponseEntity<CoffeeComradeResponse> create(@Valid @RequestBody CoffeeComradeRequest request) {
-        CoffeeComradeResponse created = repository.create(request.name(), request.defaultBrewId());
+    public ResponseEntity<LineItemResponse> create(@Valid @RequestBody LineItemRequest request) {
+        LineItemResponse created = repository.create(
+                request.procurementId(), request.comradeId(), request.brewId());
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     @GetMapping
-    public List<CoffeeComradeResponse> list() {
+    public List<LineItemResponse> list() {
         return repository.findAll();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<CoffeeComradeResponse> get(@PathVariable UUID id) {
+    public ResponseEntity<LineItemResponse> get(@PathVariable UUID id) {
         return ResponseEntity.of(repository.findById(id));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<CoffeeComradeResponse> update(
-            @PathVariable UUID id, @Valid @RequestBody CoffeeComradeRequest request) {
-        return ResponseEntity.of(repository.update(id, request.name(), request.defaultBrewId()));
+    public ResponseEntity<LineItemResponse> update(
+            @PathVariable UUID id, @Valid @RequestBody LineItemRequest request) {
+        return ResponseEntity.of(repository.update(
+                id, request.procurementId(), request.comradeId(), request.brewId()));
     }
 
     @DeleteMapping("/{id}")
