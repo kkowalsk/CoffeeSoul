@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
-import { 
-  Box, 
-  Button, 
-  Diagram, 
+import React, { useEffect, useRef, useState } from 'react';
+import {
+  Box,
+  Button,
+  Diagram,
   Heading,
-  Paragraph, 
+  Paragraph,
+  RangeInput,
   Stack,
   Text
 } from 'grommet';
@@ -14,6 +15,8 @@ import NetBalanceView from './NetBalanceView';
 
 // draw-in animation duration (ms) for a newly created connection
 export const DRAW_MS = 1000;
+// interval (ms) between simulation ticks while "Simulate Orders" is running
+const TICK_MS = 500;
 // muted grey for connections belonging to non-selected coffees
 const OTHER_LINE = 'rgba(120, 120, 120, 0.35)';
 
@@ -86,27 +89,34 @@ const shuffle = (items) => {
   return result;
 };
 
-// "Randomize" button helper: assigns EVERY person a connection, replacing
-// whatever's currently mapped -- half (by headcount, not just whoever
-// already had a connection) go back to their own default brew (dropped
-// entirely if they don't have one -- there's nothing to reset to); the other
-// half get a different, randomly picked brew (different from whatever
-// they're currently connected to, if anything).
-export const randomizeConnections = (connections, persons, coffees) => {
+// "Randomize" button helper (and the simulation's per-tick logic): assigns
+// EVERY person a connection, replacing whatever's currently mapped.
+// `randomCount` (0..persons.length, defaulting to half) is how many people --
+// by headcount, not just whoever already had a connection -- get a
+// different, randomly picked brew (different from whatever they're
+// currently connected to, if anything); everyone else goes back to their own
+// default brew (dropped entirely if they don't have one -- there's nothing
+// to reset to). randomCount === persons.length means everyone gets randomized.
+export const randomizeConnections = (
+  connections,
+  persons,
+  coffees,
+  randomCount = Math.floor(persons.length / 2),
+) => {
+  const clampedRandomCount = Math.max(0, Math.min(randomCount, persons.length));
   const shuffled = shuffle(persons);
-  const splitAt = Math.floor(shuffled.length / 2);
 
-  const toDefault = shuffled.slice(0, splitAt).flatMap((person) =>
-    person.defaultBrewId ? [connection(person.defaultBrewId, person.id)] : [],
-  );
-
-  const toRandomBrew = shuffled.slice(splitAt).flatMap((person) => {
+  const toRandomBrew = shuffled.slice(0, clampedRandomCount).flatMap((person) => {
     const current = connections.find((c) => c.toTarget === person.id)?.fromTarget;
     const alternatives = coffees.filter((brew) => brew.id !== current);
     if (alternatives.length === 0) return [];
     const pick = alternatives[Math.floor(Math.random() * alternatives.length)];
     return [connection(pick.id, person.id)];
   });
+
+  const toDefault = shuffled.slice(clampedRandomCount).flatMap((person) =>
+    person.defaultBrewId ? [connection(person.defaultBrewId, person.id)] : [],
+  );
 
   return [...toDefault, ...toRandomBrew];
 };
@@ -158,6 +168,10 @@ export default function OrderView({
   selectPerson,
   onPlaceOrder,
   onRandomizeConnections,
+  onResetHistory,
+  onSimulationTick,
+  randomCount,
+  onRandomCountChange,
   payee,
   lineItems,
   procurements,
@@ -172,6 +186,37 @@ export default function OrderView({
   // The finalized procurement returned by the last successful order, so its
   // total can be shown alongside the payee below.
   const [response, setResponse] = useState(null);
+
+  // "Simulate Orders" toggle: fires onSimulationTick on an interval until
+  // toggled off. onSimulationTick is a fresh closure every App render (it
+  // closes over `connections`/`persons`/`coffees`), so it's kept in a ref
+  // rather than the effect's dependency array -- otherwise the interval
+  // would be torn down and restarted on every single tick's re-render,
+  // instead of just once when the toggle flips. tickInFlight skips a tick
+  // if the previous one (a real network round-trip) hasn't finished yet,
+  // so a slow response can't pile up concurrent orders.
+  const [simulating, setSimulating] = useState(false);
+  const onSimulationTickRef = useRef(onSimulationTick);
+  const tickInFlight = useRef(false);
+  useEffect(() => {
+    onSimulationTickRef.current = onSimulationTick;
+  }, [onSimulationTick]);
+  useEffect(() => {
+    if (!simulating) return undefined;
+    const id = setInterval(async () => {
+      if (tickInFlight.current) return;
+      tickInFlight.current = true;
+      try {
+        const result = await onSimulationTickRef.current?.();
+        setResponse(result ?? null);
+      } catch (e) {
+        console.error('simulation tick failed', e);
+      } finally {
+        tickInFlight.current = false;
+      }
+    }, TICK_MS);
+    return () => clearInterval(id);
+  }, [simulating]);
 
   return (
     <>
@@ -267,11 +312,53 @@ export default function OrderView({
         )}
       </Stack>
 
+      {/* Controls how many people (out of everyone) "Randomize Connections"
+          and each simulation tick assign a random brew to -- the rest go
+          back to their own default. Max = everyone randomized. */}
+      <Box align="center" pad={{ top: 'medium' }} width="medium">
+        <Text size="small">
+          Random brews: {randomCount} / {persons.length}
+        </Text>
+        <RangeInput
+          min={0}
+          max={persons.length}
+          step={1}
+          value={randomCount}
+          onChange={(e) => onRandomCountChange?.(Number(e.target.value))}
+        />
+      </Box>
       <Box align="center" pad={{ top: 'medium' }}>
         <Button
           secondary
           label="Randomize Connections"
           onClick={() => onRandomizeConnections?.()}
+        />
+      </Box>
+      <Box align="center" pad={{ top: 'small' }}>
+        <Button
+          secondary
+          color="status-critical"
+          label="Reset History"
+          onClick={async () => {
+            // Irreversible (wipes every past order server-side) -- confirm
+            // before firing, same as any destructive action.
+            if (!window.confirm('Permanently delete all past orders and restart the round robin? This cannot be undone.')) {
+              return;
+            }
+            try {
+              await onResetHistory?.();
+            } catch (e) {
+              console.error('reset history failed', e);
+            }
+          }}
+        />
+      </Box>
+      <Box align="center" pad={{ top: 'small' }}>
+        <Button
+          primary={simulating}
+          secondary={!simulating}
+          label={simulating ? 'Stop Simulation' : 'Simulate Orders'}
+          onClick={() => setSimulating((prev) => !prev)}
         />
       </Box>
       <BusyButton onOrder={onPlaceOrder} onResult={setResponse} />

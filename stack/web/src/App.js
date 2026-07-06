@@ -47,6 +47,11 @@ async function postJson(path, body) {
   return res.json();
 }
 
+async function deleteRequest(path) {
+  const res = await fetch(`${API}${path}`, { method: 'DELETE' });
+  if (!res.ok) throw new Error(`DELETE ${path} -> ${res.status}`);
+}
+
 // tab icon pixel size, shared so the four <img> icons + the theme's tab-row
 // gap/padding stay proportional if this changes.
 const TAB_ICON_SIZE = 56;
@@ -111,6 +116,12 @@ function App() {
   // Past procurements and their line items, for the History tab.
   const [procurements, setProcurements] = useState([]);
   const [lineItems, setLineItems] = useState([]);
+  // How many people (out of all persons) get a random brew vs. their default,
+  // on both "Randomize Connections" and each simulation tick. null until the
+  // user touches the slider, so it tracks persons.length (half) as comrades
+  // load in/get added, rather than freezing at 0 from the initial empty list.
+  const [randomCount, setRandomCount] = useState(null);
+  const effectiveRandomCount = randomCount ?? Math.floor(persons.length / 2);
   const flip = flipConnection(setConnections);
 
   useEffect(() => {
@@ -142,18 +153,22 @@ function App() {
     }
   };
 
-  // "Randomize Connections" button: reshuffle half of the current mappings
-  // back to their owner's default brew, and move the other half to a
-  // different, randomly picked brew. See randomizeConnections in OrderView.
-  const randomizeHalf = () => setConnections((prev) => randomizeConnections(prev, persons, coffees));
+  // "Randomize Connections" button: reassigns everyone, effectiveRandomCount
+  // of them (by headcount) to a different, randomly picked brew and the rest
+  // back to their own default brew. See randomizeConnections in OrderView.
+  const randomizeConnectionsNow = () =>
+    setConnections((prev) => randomizeConnections(prev, persons, coffees, effectiveRandomCount));
 
-  // "Place Order": create an Order (procurement), then a LineItem for every
-  // explicit connection PLUS every person who never got clicked this round
-  // (they get their default brew), then finalize it so the weighted round
-  // robin picks a payee.
-  const placeOrder = async () => {
-    if (connections.length === 0) return;
-    const orderConnections = [...connections, ...unclaimedDefaultConnections(persons, connections)];
+  // Shared by "Place Order" and the simulation below: create an Order
+  // (procurement), then a LineItem for every explicit connection PLUS every
+  // person who never got clicked this round (they get their default brew),
+  // then finalize it so the weighted round robin picks a payee. Takes the
+  // connections to order explicitly (rather than always reading `connections`
+  // state) so the simulation can pass its own just-randomized set without
+  // waiting on a state update to land first.
+  const placeOrderWith = async (activeConnections) => {
+    if (activeConnections.length === 0) return null;
+    const orderConnections = [...activeConnections, ...unclaimedDefaultConnections(persons, activeConnections)];
     console.log('placing order for connections:', orderConnections);
     setPayee(null);
     const order = await postJson('/procurements', {});
@@ -175,6 +190,32 @@ function App() {
     setProcurements((prev) => [...prev, finalized]);
     setLineItems((prev) => [...prev, ...newLineItems]);
     return finalized;
+  };
+
+  const placeOrder = () => placeOrderWith(connections);
+
+  // "Simulate Orders" toggle: randomizes connections, then places an order
+  // with that EXACT randomized set -- not the `connections` state, which
+  // wouldn't have re-rendered yet if we called onRandomizeConnections and
+  // onPlaceOrder back to back. Reuses placeOrderWith directly (the same
+  // order-placing codepath as the real button) but skips BusyButton's
+  // busy/success UI and its 2s reset timer, which would fight a fast cadence.
+  const runSimulationTick = async () => {
+    const randomized = randomizeConnections(connections, persons, coffees, effectiveRandomCount);
+    setConnections(randomized);
+    return placeOrderWith(randomized);
+  };
+
+  // "Reset History": deletes every procurement/line item server-side (brews
+  // and comrades are untouched) and restarts the weighted round robin, then
+  // clears the equivalent client-side state to match.
+  const resetHistory = async () => {
+    await deleteRequest('/procurements');
+    setProcurements([]);
+    setLineItems([]);
+    setConnections([]);
+    setPayee(null);
+    setDrawing(null);
   };
 
   // Add a new coffee comrade, then append it to the loaded list so the
@@ -222,7 +263,11 @@ function App() {
                 isConnected={isConnected}
                 selectPerson={selectPerson}
                 onPlaceOrder={placeOrder}
-                onRandomizeConnections={randomizeHalf}
+                onRandomizeConnections={randomizeConnectionsNow}
+                onResetHistory={resetHistory}
+                onSimulationTick={runSimulationTick}
+                randomCount={effectiveRandomCount}
+                onRandomCountChange={setRandomCount}
                 payee={payee}
                 lineItems={lineItems}
                 procurements={procurements}
