@@ -67,6 +67,11 @@ const theme = {
     gap: 'medium',
     pad: { horizontal: 'small', vertical: 'small' },
     margin: { vertical: 'xsmall', horizontal: 'medium' },
+    // Tab.js only applies this background when active -- inactive tabs stay
+    // on theme.tab.background (unset/transparent).
+    active: {
+      background: 'light-4',
+    },
   },
   // Grommet's default FormField insets its label by a 'small' horizontal
   // margin but not the input/select below it, so a plain TextInput/Select

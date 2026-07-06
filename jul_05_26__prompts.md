@@ -97,3 +97,5 @@
 > using stub-out code added to MetricsView.js, add horizontal tables to:
   0) diplay how many times they've ordered specific brew types
   1) display (cost of brew type * times ordered) / (total across their line items)
+
+> set background color grey on selected tab in app.js
