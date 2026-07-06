@@ -92,6 +92,13 @@ public class ProcurementRepository {
         return jdbc.update("DELETE FROM procurement WHERE id = ?", id) > 0;
     }
 
+    // line_item rows go with their procurement via ON DELETE CASCADE (see
+    // V1__init_schema.sql) -- brew/coffee_comrade are untouched, they aren't
+    // referenced by this table.
+    public void deleteAll() {
+        jdbc.update("DELETE FROM procurement");
+    }
+
     // procurements that have already gone through WeightedRoundRobinService's
     // finalize step, oldest first -- used to replay history and rebuild
     // in-memory comrade weights on startup.
