@@ -81,3 +81,19 @@
   additionally, when the order is placed, clear all yellow lines and re-render default connections
 
     > great, now when order is placed, line items are the combination of remaining default connections + selected connections
+
+
+> following the same pattern as procurement history (HistoryView.js),
+  implement the MetricsView.js
+
+  requirements
+  0) panel for each coffee_comrade
+  1) render grey background upon expansion
+  2) simple <DataTable> with rows corresponding to a coffee comrade's line items
+  3) add total at bottom with linebreak separating LineItems and total
+  4) bold and make text colored (#01A982) for procurements where comrade was the payee
+  5) descending order
+
+> using stub-out code added to MetricsView.js, add horizontal tables to:
+  0) diplay how many times they've ordered specific brew types
+  1) display (cost of brew type * times ordered) / (total across their line items)

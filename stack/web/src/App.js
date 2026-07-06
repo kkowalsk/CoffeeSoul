@@ -240,7 +240,12 @@ function App() {
               // title={<Text size="large">Metrics</Text>}
               icon={<img src="/benchmarking.png" alt="" width={TAB_ICON_SIZE} height={TAB_ICON_SIZE} />}
             >
-              <MetricsView />
+              <MetricsView
+                persons={persons}
+                coffees={coffees}
+                lineItems={lineItems}
+                procurements={procurements}
+              />
             </Tab>
           </Tabs>
         </PageContent>
