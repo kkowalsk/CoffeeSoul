@@ -149,7 +149,7 @@ export default function OrderView({
               <OptionBox
                 key={brew.id}
                 id={brew.id}
-                label={brew.name}
+                label={<>{brew.name} <i>${brew.price}</i></>}
                 active={coffee === brew.id}
                 onClick={() => setCoffee(brew.id)}
               />
