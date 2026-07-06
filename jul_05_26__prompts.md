@@ -101,3 +101,5 @@
 > set background color grey on selected tab in app.js
 
 > in PeopleView.js, add frontend logic requiring Default Brew to be selected and passed to API
+
+> re-order brew map in OrdersView to be by price ascending

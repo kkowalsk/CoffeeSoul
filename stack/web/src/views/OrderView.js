@@ -145,7 +145,7 @@ export default function OrderView({
           pad={{ horizontal: 'xlarge', vertical: 'medium' }}
         >
           <Box gap="medium">
-            {coffees.map((brew) => (
+            {[...coffees].sort((a, b) => a.price - b.price).map((brew) => (
               <OptionBox
                 key={brew.id}
                 id={brew.id}
