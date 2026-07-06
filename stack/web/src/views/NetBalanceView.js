@@ -72,7 +72,7 @@ export default function NetBalanceView({ persons, coffees, lineItems, procuremen
   return (
     <>
       <Heading level={3} size="small" margin={{ bottom: 'xsmall', top: 'none' }}>
-        Running Balance
+        Net Balance over time
       </Heading>
       <DataChart
         data={data}
