@@ -38,10 +38,38 @@ export default function MetricsView({ persons, coffees, lineItems, procurements 
         View Metrics per Person aswell as overall stats.
         The last line in the table indicates how much the all the Line Items cost vs. how much the person paid vs. the difference between the two.
       </Paragraph>
-      <NetBalanceBarChart persons={persons} coffees={coffees} lineItems={lineItems} procurements={procurements} />
-      <NetBalanceView persons={persons} coffees={coffees} lineItems={lineItems} procurements={procurements} />
-      <Box pad="medium">
-      <Accordion gap="small" activeIndex={activeIndexes} onActive={setActiveIndexes}>
+      <Box
+        border={{ color: 'border', size: 'small' }}
+        round="small"
+        pad="medium"
+        gap="small"
+        align="center"
+      >
+        <NetBalanceBarChart persons={persons} coffees={coffees} lineItems={lineItems} procurements={procurements} />
+      </Box>
+      
+      <br></br>
+
+      <Box
+        border={{ color: 'border', size: 'small' }}
+        round="small"
+        pad="medium"
+        gap="small"
+        align="center"
+      >
+        <NetBalanceView persons={persons} coffees={coffees} lineItems={lineItems} procurements={procurements} />
+      </Box>
+
+      <br></br>
+
+      <Box
+        border={{ color: 'border', size: 'small' }}
+        round="small"
+        pad="medium"
+        gap="small"
+        align="stretch"
+      >
+      <Accordion fill="horizontal" gap="small" align="stretch" activeIndex={activeIndexes} onActive={setActiveIndexes}>
         {persons.map((comrade, index) => {
           const items = comradeLineItems(comrade, lineItems, coffees, procurements);
           const byBrew = brewBreakdown(items);
