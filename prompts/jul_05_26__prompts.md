@@ -2,14 +2,11 @@
 
 > ToggleGroup, allow no options to be selected
 
-
 > Goal: map the Coffee option Toggle element to the Person option Toggle element. draw connections (lines) between the specific toggle option boxes. One coffee option may map to 0..* Person options.
-  define re-useable function that is passed to Toggle.onToggle() that creates a new connection or deletes the current one (flips the previous state)
-
+  > define re-useable function that is passed to Toggle.onToggle() that creates a new connection or deletes the current one (flips the previous state)
 
 > utilizing the Grommet animated example, render an animation when new connections are created between a coffee and person
-  here's the animated example
-
+  > here's the animated example
     > can only new connections be drawn when person selected? i.e. not re-render the existing connections
     > yes, implement caveat fix
     > it's a bit buggy, rollback this change to first version
@@ -29,14 +26,11 @@
 > using LoggerFactory, add logging for ever request in Services
 
 > the API and web page are connected. time to implement the WeightedRoundRobin logic found in poc.py. see sequence diagram outlined in weighted_round_robin.puml. ask clarifying questions
-    >  User answered Claude's questions:
-        · The sequence diagram's startup section only loads/creates a single round-robin UUID row — it doesn't replay historical procurements. Should comrade weight totals live purely in memory (reset to zero every time the API restarts), or should the service rebuild weights from all past finalized procurements at startup? → Rebuild from DB history at startup
-        · The diagram shows 'web -> pc: finalize order' as an explicit step after all line items are created. How far should this task go on the frontend? → Full end-to-end (Recommended)
-        · What should happen if finalize is called on a procurement that already has a payee set (e.g. duplicate request, or retry)? → Reject with a conflict (Recommended)
-
+    > Rebuild from DB history at startup
+    > Full end-to-end (Recommended)
+    > Reject with a conflict (Recommended)
 
 > update icon to be coffee-cup.png and attribute in a footer using this
-
   <a href="https://www.flaticon.com/free-icons/coffee" title="coffee icons">Coffee icons created by Freepik - Flaticon</a>
 
 >  Map icons to Tab icons in App.js
@@ -44,7 +38,6 @@
   1) people = people.png
   2) drinks = coffee-cup.png
   3) metrics = benchmarking.png
-
 
 > refactor App.js to extract the 4 tabs into views stored in separate files
 
@@ -59,13 +52,11 @@
 
 > when the order page is loaded, iterate over the Persons array and create grey'ed connections between their default brews in the coffee buttons and their person buttons. when a coffee button is selected, re-render its connections with active/colored connection
 
-
 > using the stubbed out BrewsView.js, render existing brews in card layout and add "create new brew" form at bottom
   1) re-use loaded brew data from App.js (i.e. pass into creation of view)
   2) description may be null | empty
   3) stubbing utilized storybook from https://storybook.grommet.io/
   4) icons added under public/
-
 
 > using the stubbed out HistoryView.js, render existing history
   1) invoke API and load data in App.js for list of Procurements
@@ -78,9 +69,8 @@
   probably triggered the button click event will solve a lot of these issues
   1) when a coffee/person combo is selected and the selected coffee is not the default brew, remove the grey connection
 
-  additionally, when the order is placed, clear all yellow lines and re-render default connections
-
-    > great, now when order is placed, line items are the combination of remaining default connections + selected connections
+  > additionally, when the order is placed, clear all yellow lines and re-render default connections
+  > great, now when order is placed, line items are the combination of remaining default connections + selected connections
 
 
 > following the same pattern as procurement history (HistoryView.js),
@@ -117,3 +107,5 @@
   0) button on OrderView.js. when clicked initiates a new order every 1 second
   1) bypasses the PlaceOrder button timeout but utilizes the same codepath
   2) randomizes the connections then places order
+
+> ~20 extra prompts to tweak UI behaviour
