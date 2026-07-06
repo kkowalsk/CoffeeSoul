@@ -229,7 +229,7 @@ export default function OrderView({
       {payee && (
         <Box align="center" pad={{ bottom: 'medium' }}>
           <Text weight="bold">{payee} is buying this round!</Text>
-          <Text weight="bold">Total: {response?.total}</Text>
+          <Text weight="bold">Total: <i>${response?.total}</i></Text>
         </Box>
       )}
       
