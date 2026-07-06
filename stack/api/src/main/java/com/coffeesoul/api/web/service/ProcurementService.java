@@ -93,7 +93,12 @@ public class ProcurementService {
         }
 
         UUID payeeId = roundRobinService.finalizeOrder(amountsByComrade);
-        return repository.finalize(id, payeeId, roundRobinService.getRoundRobinId())
+        ProcurementResponse finalized = repository.finalize(id, payeeId, roundRobinService.getRoundRobinId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "procurement not found"));
+
+        // total isn't a stored column (see v_procurement_total) -- reuse the
+        // amounts already gathered above rather than an extra query.
+        BigDecimal total = amountsByComrade.values().stream().reduce(BigDecimal.ZERO, BigDecimal::add);
+        return finalized.withTotal(total);
     }
 }

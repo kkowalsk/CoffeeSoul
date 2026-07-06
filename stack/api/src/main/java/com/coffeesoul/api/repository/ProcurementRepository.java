@@ -23,13 +23,16 @@ public class ProcurementRepository {
                     rs.getObject("procurement_id", UUID.class),
                     rs.getBigDecimal("total"));
 
+    // total is left null here for every repository-sourced response; only
+    // ProcurementService.finalize() populates it (see ProcurementResponse).
     private static final RowMapper<ProcurementResponse> ROW_MAPPER = (rs, rowNum) -> {
         OffsetDateTime timestamp = rs.getObject("timestamp", OffsetDateTime.class);
         return new ProcurementResponse(
                 rs.getObject("id", UUID.class),
                 timestamp != null ? timestamp.toInstant() : null,
                 rs.getObject("payee_id", UUID.class),
-                rs.getObject("round_robin_id", UUID.class));
+                rs.getObject("round_robin_id", UUID.class),
+                null);
     };
 
     private final JdbcTemplate jdbc;
