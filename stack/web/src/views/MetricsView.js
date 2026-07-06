@@ -1,5 +1,16 @@
 import React, { useState } from 'react';
-import { Accordion, AccordionPanel, Box, Data, DataChart, DataTable, Heading, Text, ThemeContext } from 'grommet';
+import { 
+  Accordion,
+  AccordionPanel,
+  Box,
+  Data,
+  DataChart,
+  DataTable,
+  Heading,
+  Paragraph,
+  Text, 
+  ThemeContext
+} from 'grommet';
 
 // DataChart draws bars from this palette by default (one entry per series).
 // Overriding it locally (rather than passing a `chart` prop with a color) is
@@ -16,7 +27,14 @@ export default function MetricsView({ persons, coffees, lineItems, procurements 
   const [activeIndexes, setActiveIndexes] = useState([]);
 
   return (
-    <Box pad="medium">
+    <>
+      <Heading level={2}>
+        Metrics
+      </Heading>
+      <Paragraph>
+        View Metrics per Person aswell as overall stats.
+      </Paragraph>
+      <Box pad="medium">
       <Accordion gap="small" activeIndex={activeIndexes} onActive={setActiveIndexes}>
         {persons.map((comrade, index) => {
           const items = comradeLineItems(comrade, lineItems, coffees, procurements);
@@ -100,6 +118,7 @@ export default function MetricsView({ persons, coffees, lineItems, procurements 
         })}
       </Accordion>
     </Box>
+    </>
   );
 }
 
