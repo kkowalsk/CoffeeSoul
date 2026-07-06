@@ -12,24 +12,20 @@
 
 > set postgres timezone to be MDT
 
-feature branch swithc
 > lets refactor the microservice container to a java springboot backend. ask questions if need be    
-    > Should the Spring Boot service keep the same one-shot batch behavior (runs the round-robin over orders_mixed.json on startup, writes to db, exits), or become a real long-running REST API (e.g. endpoints to submit orders / trigger processing / query results)?
-        → the next steps are refactoring it to a REST API  but for now, keep the logic but do nothing on startup
-    > Maven or Gradle for the build?
-        → Gradle
-    > Which Java version / Spring Boot version?
-        → Java 21 + Spring Boot 3.3.x (Recommended)
+    > the next steps are refactoring it to a REST API  but for now, keep the logic but do nothing on startup
+    > Gradle
+    > Java 21 + Spring Boot 3.3.x (Recommended)
 
 > add REST APIs for POST/PUT/GET/DELETE for the following domain objects:
-| - | POST | PUT | GET | DELETE | notes |
-| - | - | - | - | - | - |
-| brew | x | x | x | x | name/price required, desc optional |
-| coffeecomrade | x | x | x | x | name required, defaultbrew optional | 
-| lineitem | x | x | x | x | comrade, brew required |
-| procurement | x | x | x | x | timestamp updataeble. lineitems added via separate request |
+    | - | POST | PUT | GET | DELETE | notes |
+    | - | - | - | - | - | - |
+    | brew | x | x | x | x | name/price required, desc optional |
+    | coffeecomrade | x | x | x | x | name required, defaultbrew optional | 
+    | lineitem | x | x | x | x | comrade, brew required |
+    | procurement | x | x | x | x | timestamp updataeble. lineitems added via separate request |
 
-skip smoothweightedroundrobin 
+> skip smoothweightedroundrobin 
 
 > extract url and versioning properties to application.properties file
 
