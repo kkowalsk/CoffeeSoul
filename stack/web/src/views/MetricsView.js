@@ -31,7 +31,7 @@ export default function MetricsView({ persons, coffees, lineItems, procurements 
       <Heading level={2}>
         Metrics
       </Heading>
-      <Paragraph>
+      <Paragraph fill>
         View Metrics per Person aswell as overall stats.
         The last line in the table indicates how much the all the Line Items cost vs. how much the person paid vs. the difference between the two.
       </Paragraph>

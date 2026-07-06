@@ -34,7 +34,7 @@ export default function HistoryView({ procurements, persons, coffees, lineItems 
       <Heading level={2}>
         Order History
       </Heading>
-      <Paragraph>
+      <Paragraph fill>
         View a chronological history of past orders.
       </Paragraph>
       <Box pad="medium">
