@@ -105,3 +105,15 @@
 > re-order brew map in OrdersView to be by price ascending
 
 > add optional total field in ProcurementResponse that is unset in create, but included in finalize endpoint
+
+> feature: reset history
+  0) add button to OrderView.js "Reset history"
+  1) when clicked, hits API to remove procurements and restart round robin
+     a) all line items are deleted
+     b) all procurements are deleted
+     c) brews and comrades are preserved
+
+> new feature: click a button and kick off a long running scenario
+  0) button on OrderView.js. when clicked initiates a new order every 1 second
+  1) bypasses the PlaceOrder button timeout but utilizes the same codepath
+  2) randomizes the connections then places order
