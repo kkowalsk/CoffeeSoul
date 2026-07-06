@@ -33,6 +33,7 @@ export default function MetricsView({ persons, coffees, lineItems, procurements 
       </Heading>
       <Paragraph>
         View Metrics per Person aswell as overall stats.
+        The last line in the table indicates how much the all the Line Items cost vs. how much the person paid vs. the difference between the two.
       </Paragraph>
       <Box pad="medium">
       <Accordion gap="small" activeIndex={activeIndexes} onActive={setActiveIndexes}>
@@ -243,21 +244,21 @@ const columns = (items) => {
       header: 'Price',
       align: 'end',
       render: (datum) => cell(`$${datum.price}`, datum.isPayee),
-      footer: `$${total.toFixed(2)}`,
+      footer: <Text><b>Costs</b><br></br>${total.toFixed(2)}</Text>,
     },
     {
       property: 'paid',
       header: 'Paid',
       align: 'end',
       render: (datum) => (datum.isPayee ? cell(`-$${datum.total.toFixed(2)}`, true) : ''),
-      footer: `-$${paidTotal.toFixed(2)}`,
+      footer: <Text><b>Paid</b><br></br>-${paidTotal.toFixed(2)}</Text>,
     },,
     {
       property: 'net',
-      header: 'Net',
+      header: '',
       align: 'end',
       render: '',
-      footer: `${(total - paidTotal).toFixed(2)}`,
+      footer: <Text><b>Net</b><br></br>${(total - paidTotal).toFixed(2)}</Text>,
     },
   ];
 };
