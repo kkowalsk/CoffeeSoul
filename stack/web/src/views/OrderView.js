@@ -314,15 +314,32 @@ export default function OrderView({
       </Stack>
 
       <BusyButton onOrder={onPlaceOrder} onResult={setResponse} />
-      {payee && (
-        <Box align="center" pad={{ bottom: 'medium' }}>
-          <Text weight="bold">{payee} is buying this round!</Text>
-          <Text weight="bold">Total: <i>${response?.total}</i></Text>
-        </Box>
-      )}
+      
+      <Box align="center" pad={{ bottom: 'medium' }}>
+        <Text weight="bold">{payee ? `${payee} is buying this round!` : "Who's paying for coffee this time?"}</Text>
+        <Text weight="bold">Total: <i>${response?.total}</i></Text>
+      </Box>
 
-      <NetBalanceBarChart persons={persons} coffees={coffees} lineItems={lineItems} procurements={procurements} />
-      <NetBalanceView persons={persons} coffees={coffees} lineItems={lineItems} procurements={procurements} />
+      <br></br>
+      <Box
+        border={{ color: 'border', size: 'small' }}
+        round="small"
+        pad="medium"
+        gap="small"
+        align="stretch"
+      >
+        <NetBalanceBarChart persons={persons} coffees={coffees} lineItems={lineItems} procurements={procurements} />
+      </Box>
+      <br></br>
+      <Box
+        border={{ color: 'border', size: 'small' }}
+        round="small"
+        pad="medium"
+        gap="small"
+        align="stretch"
+      >
+        <NetBalanceView persons={persons} coffees={coffees} lineItems={lineItems} procurements={procurements} />
+      </Box>
 
       <br></br>
 
