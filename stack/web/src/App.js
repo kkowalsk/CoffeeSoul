@@ -17,6 +17,7 @@ import {
 import OrderView, { DRAW_MS, connection, flipConnection } from './views/OrderView';
 import PeopleView from './views/PeopleView';
 import BrewsView from './views/BrewsView';
+import HistoryView from './views/HistoryView';
 import MetricsView from './views/MetricsView';
 
 // --- backend API ---
@@ -96,6 +97,9 @@ function App() {
   // Name of whoever the weighted round robin picked to pay for the most
   // recently finalized order; cleared when a new order starts.
   const [payee, setPayee] = useState(null);
+  // Past procurements and their line items, for the History tab.
+  const [procurements, setProcurements] = useState([]);
+  const [lineItems, setLineItems] = useState([]);
   const flip = flipConnection(setConnections);
 
   useEffect(() => {
@@ -103,6 +107,12 @@ function App() {
     getJson('/coffee-comrades')
       .then(setPersons)
       .catch((e) => console.error('load comrades', e));
+    getJson('/procurements')
+      .then(setProcurements)
+      .catch((e) => console.error('load procurements', e));
+    getJson('/line-items')
+      .then(setLineItems)
+      .catch((e) => console.error('load line items', e));
   }, []);
 
   const isConnected = (coffeeId, personId) =>
@@ -129,7 +139,7 @@ function App() {
     console.log('placing order for connections:', connections);
     setPayee(null);
     const order = await postJson('/procurements', {});
-    await Promise.all(
+    const newLineItems = await Promise.all(
       connections.map((c) =>
         postJson('/line-items', {
           procurementId: order.id,
@@ -142,6 +152,10 @@ function App() {
     console.log('order placed:', order.id, 'payee:', finalized.payeeId);
     setPayee(persons.find((p) => p.id === finalized.payeeId)?.name ?? null);
     setConnections([]);
+    // Append rather than refetch, so the History tab reflects this order
+    // immediately instead of showing a stale snapshot from page load.
+    setProcurements((prev) => [...prev, finalized]);
+    setLineItems((prev) => [...prev, ...newLineItems]);
   };
 
   // Add a new coffee comrade, then append it to the loaded list so the
@@ -203,6 +217,17 @@ function App() {
               icon={<img src="/coffee-cup.png" alt="" width={TAB_ICON_SIZE} height={TAB_ICON_SIZE} />}
             >
               <BrewsView coffees={coffees} onCreateBrew={createBrew} />
+            </Tab>
+            <Tab
+              // title={<Text size="large">History</Text>}
+              icon={<img src="/clipboard.png" alt="" width={TAB_ICON_SIZE} height={TAB_ICON_SIZE} />}
+            >
+              <HistoryView
+                procurements={procurements}
+                persons={persons}
+                coffees={coffees}
+                lineItems={lineItems}
+              />
             </Tab>
             <Tab
               // title={<Text size="large">Metrics</Text>}
