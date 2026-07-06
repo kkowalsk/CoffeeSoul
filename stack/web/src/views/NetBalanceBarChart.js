@@ -44,7 +44,7 @@ export default function NetBalanceBarChart({ persons, coffees, lineItems, procur
   return (
     <>
       <Heading level={3} size="small" margin={{ bottom: 'xsmall', top: 'none' }}>
-        Current Balance
+        Net Balance (i.e. Should've paid - Actual paid)
       </Heading>
       <ThemeContext.Extend value={CHART_THEME}>
         <DataChart
