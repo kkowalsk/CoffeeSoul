@@ -12,6 +12,8 @@ import {
   ThemeContext
 } from 'grommet';
 
+import NetBalanceView from './NetBalanceView';
+
 // DataChart draws bars from this palette by default (one entry per series).
 // Overriding it locally (rather than passing a `chart` prop with a color) is
 // what keeps each row bound to its OWN value -- adding an explicit `chart`
@@ -35,6 +37,7 @@ export default function MetricsView({ persons, coffees, lineItems, procurements 
         View Metrics per Person aswell as overall stats.
         The last line in the table indicates how much the all the Line Items cost vs. how much the person paid vs. the difference between the two.
       </Paragraph>
+      <NetBalanceView persons={persons} coffees={coffees} lineItems={lineItems} procurements={procurements} />
       <Box pad="medium">
       <Accordion gap="small" activeIndex={activeIndexes} onActive={setActiveIndexes}>
         {persons.map((comrade, index) => {
@@ -252,7 +255,7 @@ const columns = (items) => {
       align: 'end',
       render: (datum) => (datum.isPayee ? cell(`-$${datum.total.toFixed(2)}`, true) : ''),
       footer: <Text><b>Paid</b><br></br>-${paidTotal.toFixed(2)}</Text>,
-    },,
+    },
     {
       property: 'net',
       header: '',
