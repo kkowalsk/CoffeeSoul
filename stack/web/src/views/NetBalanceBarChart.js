@@ -39,13 +39,14 @@ const verticalLabel = (label) => (
 export default function NetBalanceBarChart({ persons, coffees, lineItems, procurements }) {
   const data = currentBalances(persons, lineItems, coffees, procurements);
 
-  if (data.length === 0) return null;
-
   return (
     <>
       <Heading level={3} size="small" margin={{ bottom: 'xsmall', top: 'none' }}>
         Net Balance (i.e. Should've paid - Actual paid)
       </Heading>
+      {data.length === 0 || procurements.length === 0 ? (
+        <Text color="dark-4">No people/data yet.</Text>
+      ) : (
       <ThemeContext.Extend value={CHART_THEME}>
         <DataChart
           data={data}
@@ -70,6 +71,7 @@ export default function NetBalanceBarChart({ persons, coffees, lineItems, procur
           size={{ height: '280px', width: 'fill' }}
         />
       </ThemeContext.Extend>
+      )}
     </>
   );
 }

@@ -38,13 +38,41 @@ export default function MetricsView({ persons, coffees, lineItems, procurements 
         View Metrics per Person aswell as overall stats.
         The last line in the table indicates how much the all the Line Items cost vs. how much the person paid vs. the difference between the two.
       </Paragraph>
-      <NetBalanceBarChart persons={persons} coffees={coffees} lineItems={lineItems} procurements={procurements} />
-      <NetBalanceView persons={persons} coffees={coffees} lineItems={lineItems} procurements={procurements} />
-      <Box pad="medium">
-      <Accordion gap="small" activeIndex={activeIndexes} onActive={setActiveIndexes}>
+      <Box
+        border={{ color: 'border', size: 'small' }}
+        round="small"
+        pad="medium"
+        gap="small"
+        align="stretch"
+      >
+        <NetBalanceBarChart persons={persons} coffees={coffees} lineItems={lineItems} procurements={procurements} />
+      </Box>
+      
+      <br></br>
+
+      <Box
+        border={{ color: 'border', size: 'small' }}
+        round="small"
+        pad="medium"
+        gap="small"
+        align="stretch"
+      >
+        <NetBalanceView persons={persons} coffees={coffees} lineItems={lineItems} procurements={procurements} />
+      </Box>
+
+      <br></br>
+
+      <Box
+        border={{ color: 'border', size: 'small' }}
+        round="small"
+        pad="medium"
+        gap="small"
+        align="stretch"
+      >
+      <Accordion fill="horizontal" gap="small" align="stretch" activeIndex={activeIndexes} onActive={setActiveIndexes}>
         {persons.map((comrade, index) => {
           const items = comradeLineItems(comrade, lineItems, coffees, procurements);
-          const byBrew = brewBreakdown(items);
+          const byBrew = brewBreakdown(items, coffees);
           return (
             <AccordionPanel
               key={comrade.id}
@@ -79,7 +107,7 @@ export default function MetricsView({ persons, coffees, lineItems, procurements 
                         chart={{ property: 'count', thickness: 'small' }}
                         gap="none"
                         direction="horizontal"
-                        size={{ height: '70px', width: 'fill' }}
+                        size={{ height: 'small', width: 'fill' }}
                         bounds={{ x: axisMarkers(maxCount(byBrew)) }}
                         axis={{
                           x: { granularity: 'fine' },
@@ -111,7 +139,7 @@ export default function MetricsView({ persons, coffees, lineItems, procurements 
                         chart={{ property: 'spend', thickness: 'small' }}
                         gap="none"
                         direction="horizontal"
-                        size={{ height: '70px', width: 'fill' }}
+                        size={{ height: 'small', width: 'fill' }}
                         axis={{
                           x: { granularity: 'fine' },
                           y: { property: 'label', granularity: 'fine' },
@@ -150,8 +178,15 @@ const panelLabel = (comrade, isActive) => (
 
 // Per-brew rollup of a comrade's line items: how many times they ordered it,
 // and how much of their spend (brew price * times ordered) it accounts for.
-const brewBreakdown = (items) => {
+// Seeded with EVERY coffee (zero counts included), not just ones this comrade
+// actually ordered -- otherwise the y-axis category count varies per comrade
+// (2 brews ordered vs. 6), making bar thickness/spacing inconsistent between
+// accordion panels. Every panel's chart now shares the same fixed row set.
+const brewBreakdown = (items, coffees) => {
   const byBrew = new Map();
+  for (const coffee of coffees) {
+    byBrew.set(coffee.name, { label: coffee.name, count: 0, spend: 0 });
+  }
   for (const item of items) {
     const entry = byBrew.get(item.brew) ?? { label: item.brew, count: 0, spend: 0 };
     entry.count += 1;
