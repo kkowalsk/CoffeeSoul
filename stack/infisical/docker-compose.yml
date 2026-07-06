@@ -16,7 +16,7 @@ services:
         condition: service_healthy
       infisical-redis:
         condition: service_started
-    image: infisical/infisical:latest # pin to a specific tag for anything beyond local POC use
+    image: infisical/infisical:v0.161.12
     env_file:
       - .env
     ports:

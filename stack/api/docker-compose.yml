@@ -25,3 +25,9 @@ services:
       timeout: 5s
       retries: 10
       start_period: 30s
+    image: <aws id>.dkr.ecr.us-east-2.amazonaws.com/coffee-soul/api:latest
+    # up -d builds locally if no image is cached (Compose prefers build over
+    # pull when both are set and nothing's cached) -- force it to always pull
+    # the ECR tag instead, so `docker compose up -d` on EC2 uses what was
+    # pushed rather than rebuilding from the cloned source.
+    pull_policy: always

@@ -11,3 +11,6 @@ services:
     depends_on:
       api:
         condition: service_healthy
+    image: <aws id>.dkr.ecr.us-east-2.amazonaws.com/coffee-soul/web:latest
+    # see api/docker-compose.yml -- forces pull-from-ECR over local build
+    pull_policy: always
