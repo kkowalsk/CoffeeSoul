@@ -116,4 +116,16 @@ public class WeightedRoundRobinService {
     public UUID getRoundRobinId() {
         return roundRobinId;
     }
+
+    // Clears the in-memory weights/totals/payments back to a clean slate --
+    // paired with ProcurementRepository.deleteAll() when history is reset, so
+    // the next finalize doesn't still favor/penalize comrades from orders
+    // that no longer exist. Synchronized for the same reason finalizeOrder
+    // is: concurrent finalize calls mutate these same maps.
+    public synchronized void reset() {
+        comradeWeights.clear();
+        comradeTotals.clear();
+        comradePayments.clear();
+        log.info("round robin state reset");
+    }
 }

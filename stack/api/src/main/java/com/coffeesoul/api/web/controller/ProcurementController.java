@@ -72,6 +72,16 @@ public class ProcurementController {
                 : ResponseEntity.notFound().build();
     }
 
+    // "Reset History": deletes every procurement/line item and restarts the
+    // round robin; brews and coffee comrades are left alone. Maps to a bare
+    // DELETE /procurements (no id segment), so it can't collide with
+    // DELETE /{id} above.
+    @DeleteMapping
+    public ResponseEntity<Void> reset() {
+        service.resetHistory();
+        return ResponseEntity.noContent().build();
+    }
+
     // runs the weighted round robin and sets the payee; see
     // stack/weighted_round_robin.puml.
     @PostMapping("/{id}/finalize")

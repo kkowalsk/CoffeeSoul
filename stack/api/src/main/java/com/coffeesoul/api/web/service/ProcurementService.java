@@ -73,6 +73,15 @@ public class ProcurementService {
         return repository.delete(id);
     }
 
+    // "Reset History": wipes every procurement (and, via cascade, every line
+    // item) and restarts the weighted round robin's in-memory weights --
+    // brews and coffee comrades are untouched, they live in separate tables.
+    public void resetHistory() {
+        log.info("reset history request");
+        repository.deleteAll();
+        roundRobinService.reset();
+    }
+
     // Runs this procurement's line items through the weighted round robin to
     // pick a payee, then persists that payee alongside the round robin's id.
     // See stack/weighted_round_robin.puml ("Finalize Order").

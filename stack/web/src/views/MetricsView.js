@@ -13,6 +13,7 @@ import {
 } from 'grommet';
 
 import NetBalanceView from './NetBalanceView';
+import NetBalanceBarChart from './NetBalanceBarChart';
 
 // DataChart draws bars from this palette by default (one entry per series).
 // Overriding it locally (rather than passing a `chart` prop with a color) is
@@ -37,6 +38,7 @@ export default function MetricsView({ persons, coffees, lineItems, procurements 
         View Metrics per Person aswell as overall stats.
         The last line in the table indicates how much the all the Line Items cost vs. how much the person paid vs. the difference between the two.
       </Paragraph>
+      <NetBalanceBarChart persons={persons} coffees={coffees} lineItems={lineItems} procurements={procurements} />
       <NetBalanceView persons={persons} coffees={coffees} lineItems={lineItems} procurements={procurements} />
       <Box pad="medium">
       <Accordion gap="small" activeIndex={activeIndexes} onActive={setActiveIndexes}>
