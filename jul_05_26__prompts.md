@@ -99,3 +99,5 @@
   1) display (cost of brew type * times ordered) / (total across their line items)
 
 > set background color grey on selected tab in app.js
+
+> in PeopleView.js, add frontend logic requiring Default Brew to be selected and passed to API
