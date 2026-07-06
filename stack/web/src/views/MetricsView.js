@@ -69,12 +69,12 @@ export default function MetricsView({ persons, coffees, lineItems, procurements 
                         gap="none"
                         direction="horizontal"
                         size={{ height: '70px', width: 'fill' }}
-                        bounds={{ x: [0, maxCount(byBrew)] }}
+                        bounds={{ x: axisMarkers(maxCount(byBrew)) }}
                         axis={{
-                          x: { granularity: 'coarse' },
+                          x: { granularity: 'fine' },
                           y: { property: 'label', granularity: 'fine' },
                         }}
-                        guide={{ x: { granularity: 'coarse' }, y: { granularity: 'fine' } }}
+                        guide={{ x: { granularity: 'fine' }, y: { granularity: 'fine' } }}
                       />
                     </ThemeContext.Extend>
                   ) : (
@@ -158,6 +158,20 @@ const brewBreakdown = (items) => {
 // [0, max count] (rather than letting DataChart auto-scale/round the max)
 // is what keeps the tick values whole instead of fractional (e.g. 1.8x).
 const maxCount = (byBrew) => byBrew.reduce((max, entry) => Math.max(max, entry.count), 1);
+
+// DataChart's `bounds.x` array is rendered verbatim as the x-axis tick
+// labels (it isn't used to scale the bars), so to get evenly spaced
+// markers along the axis -- instead of just the two endpoints -- we
+// build that array ourselves: whole-number steps up to (at most) 5
+// points, so brew counts, which are always whole numbers, never render
+// as fractional tick labels.
+const axisMarkers = (max) => {
+  const step = Math.max(1, Math.ceil(max / 4));
+  const values = [];
+  for (let value = 0; value < max; value += step) values.push(value);
+  values.push(max);
+  return values;
+};
 
 // Plain-text stand-in for the "not enough rows to chart" case (see
 // byBrew.length > 1 checks above) -- covers both zero orders and exactly one.
