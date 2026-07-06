@@ -23,8 +23,9 @@ public class ProcurementRepository {
                     rs.getObject("procurement_id", UUID.class),
                     rs.getBigDecimal("total"));
 
-    // total is left null here for every repository-sourced response; only
-    // ProcurementService.finalize() populates it (see ProcurementResponse).
+    // total is left null here; used by every query that doesn't join
+    // v_procurement_total (create/find/update/finalize -- finalize populates
+    // it separately via ProcurementResponse.withTotal()).
     private static final RowMapper<ProcurementResponse> ROW_MAPPER = (rs, rowNum) -> {
         OffsetDateTime timestamp = rs.getObject("timestamp", OffsetDateTime.class);
         return new ProcurementResponse(
@@ -33,6 +34,18 @@ public class ProcurementRepository {
                 rs.getObject("payee_id", UUID.class),
                 rs.getObject("round_robin_id", UUID.class),
                 null);
+    };
+
+    // Same as ROW_MAPPER but reads the `total` column joined in from
+    // v_procurement_total; only findAll() selects that column.
+    private static final RowMapper<ProcurementResponse> ROW_MAPPER_WITH_TOTAL = (rs, rowNum) -> {
+        OffsetDateTime timestamp = rs.getObject("timestamp", OffsetDateTime.class);
+        return new ProcurementResponse(
+                rs.getObject("id", UUID.class),
+                timestamp != null ? timestamp.toInstant() : null,
+                rs.getObject("payee_id", UUID.class),
+                rs.getObject("round_robin_id", UUID.class),
+                rs.getBigDecimal("total"));
     };
 
     private final JdbcTemplate jdbc;
@@ -50,10 +63,16 @@ public class ProcurementRepository {
                 ROW_MAPPER, toOffset(timestamp), payeeId);
     }
 
+    // v_procurement_total has exactly one row per procurement (COALESCE(SUM,0)
+    // covers the no-line-items case), so a plain JOIN is safe -- it never
+    // drops a procurement.
     public List<ProcurementResponse> findAll() {
         return jdbc.query(
-                "SELECT id, \"timestamp\", payee_id, round_robin_id FROM procurement ORDER BY \"timestamp\"",
-                ROW_MAPPER);
+                "SELECT p.id, p.\"timestamp\", p.payee_id, p.round_robin_id, vpt.total "
+                        + "FROM procurement p "
+                        + "JOIN v_procurement_total vpt ON vpt.procurement_id = p.id "
+                        + "ORDER BY p.\"timestamp\"",
+                ROW_MAPPER_WITH_TOTAL);
     }
 
     public Optional<ProcurementResponse> findById(UUID id) {

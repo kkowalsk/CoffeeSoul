@@ -186,14 +186,18 @@ const comradeLineItems = (comrade, lineItems, coffees, procurements) =>
     .map((li) => {
       const brew = coffees.find((c) => c.id === li.brewId);
       const procurement = procurements.find((p) => p.id === li.procurementId);
+      // this comrade was the one who ended up paying for that order
+      const isPayee = !!procurement && procurement.payeeId === comrade.id;
       return {
         id: li.id,
+        procurementId: procurement?.id,
         timestamp: procurement?.timestamp,
         date: procurement?.timestamp ? new Date(procurement.timestamp).toLocaleString() : 'Unknown time',
         brew: brew?.name ?? 'Unknown',
         price: brew?.price ?? 0,
-        // this comrade was the one who ended up paying for that order
-        isPayee: !!procurement && procurement.payeeId === comrade.id,
+        isPayee,
+        // only the payee actually paid the procurement's total; other rows leave it blank
+        total: isPayee ? Number(procurement.total) : '',
       };
     })
     .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
@@ -212,6 +216,15 @@ const cell = (value, isPayee) =>
 // the line items -- same DataTable footer pattern as ProcurementView.
 const columns = (items) => {
   const total = items.reduce((sum, item) => sum + Number(item.price), 0);
+  // A comrade can appear as payee on multiple line items from the SAME
+  // procurement (they can order more than once per round) -- dedupe by
+  // procurementId so each paid-for procurement's total is only counted once.
+  const paidTotal = Array.from(
+    items.reduce((byProcurement, item) => {
+      if (item.isPayee) byProcurement.set(item.procurementId, Number(item.total));
+      return byProcurement;
+    }, new Map()).values()
+  ).reduce((sum, procTotal) => sum + procTotal, 0);
   return [
     {
       property: 'date',
@@ -231,6 +244,20 @@ const columns = (items) => {
       align: 'end',
       render: (datum) => cell(`$${datum.price}`, datum.isPayee),
       footer: `$${total.toFixed(2)}`,
+    },
+    {
+      property: 'paid',
+      header: 'Paid',
+      align: 'end',
+      render: (datum) => (datum.isPayee ? cell(`-$${datum.total.toFixed(2)}`, true) : ''),
+      footer: `-$${paidTotal.toFixed(2)}`,
+    },,
+    {
+      property: 'net',
+      header: 'Net',
+      align: 'end',
+      render: '',
+      footer: `${(total - paidTotal).toFixed(2)}`,
     },
   ];
 };
