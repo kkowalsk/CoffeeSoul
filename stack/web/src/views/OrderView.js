@@ -313,29 +313,71 @@ export default function OrderView({
         )}
       </Stack>
 
-      {/* Controls how many people (out of everyone) "Randomize Connections"
-          and each simulation tick assign a random brew to -- the rest go
-          back to their own default. Max = everyone randomized. */}
-      <Box align="center" pad={{ top: 'medium' }} width="medium">
-        <Text size="small">
-          Random brews: {randomCount} / {persons.length}
-        </Text>
-        <RangeInput
-          min={0}
-          max={persons.length}
-          step={1}
-          value={randomCount}
-          onChange={(e) => onRandomCountChange?.(Number(e.target.value))}
-        />
-      </Box>
-      <Box align="center" pad={{ top: 'medium' }}>
+      <BusyButton onOrder={onPlaceOrder} onResult={setResponse} />
+      {payee && (
+        <Box align="center" pad={{ bottom: 'medium' }}>
+          <Text weight="bold">{payee} is buying this round!</Text>
+          <Text weight="bold">Total: <i>${response?.total}</i></Text>
+        </Box>
+      )}
+
+      <NetBalanceBarChart persons={persons} coffees={coffees} lineItems={lineItems} procurements={procurements} />
+      <NetBalanceView persons={persons} coffees={coffees} lineItems={lineItems} procurements={procurements} />
+
+      <br></br>
+
+      {/* Simulation/testing controls, grouped together and pushed to the
+          bottom of the page since they're dev/demo aids rather than part of
+          the core order-placing flow above. */}
+      <Box
+        border={{ color: 'border', size: 'small' }}
+        round="small"
+        pad={{ top: 'small', bottom: 'medium', horizontal: 'medium' }}
+        margin={{ top: 'small', bottom: 'small' }}
+        gap="small"
+        align="center"
+      >
+        <Heading level={3} align="left" alignSelf="start" margin="none">
+          Dev Tools
+        </Heading>
+
+        {/* Controls how many people (out of everyone) "Randomize Connections"
+            and each simulation tick assign a random brew to -- the rest go
+            back to their own default. Max = everyone randomized. */}
         <Button
           secondary
-          label="Randomize Connections"
+          label="Randomize the Connections"
           onClick={() => onRandomizeConnections?.()}
         />
-      </Box>
-      <Box align="center" pad={{ top: 'small' }}>
+
+        <Box
+          border={{ color: 'border', size: 'small' }}
+          round="small"
+          pad="medium"
+          gap="small"
+          align="center"
+        >
+          <Box align="center" width="medium">
+            <Text size="small">
+              Random brews: {randomCount} / {persons.length}
+            </Text>
+            <RangeInput
+              min={0}
+              max={persons.length}
+              step={1}
+              value={randomCount}
+              onChange={(e) => onRandomCountChange?.(Number(e.target.value))}
+            />
+          </Box>
+          
+          <Button
+            primary={simulating}
+            secondary={!simulating}
+            label={simulating ? 'Stop Simulation' : 'Simulate Orders'}
+            onClick={() => setSimulating((prev) => !prev)}
+          />
+        </Box>
+
         <Button
           secondary
           color="status-critical"
@@ -354,24 +396,6 @@ export default function OrderView({
           }}
         />
       </Box>
-      <Box align="center" pad={{ top: 'small' }}>
-        <Button
-          primary={simulating}
-          secondary={!simulating}
-          label={simulating ? 'Stop Simulation' : 'Simulate Orders'}
-          onClick={() => setSimulating((prev) => !prev)}
-        />
-      </Box>
-      <BusyButton onOrder={onPlaceOrder} onResult={setResponse} />
-      {payee && (
-        <Box align="center" pad={{ bottom: 'medium' }}>
-          <Text weight="bold">{payee} is buying this round!</Text>
-          <Text weight="bold">Total: <i>${response?.total}</i></Text>
-        </Box>
-      )}
-
-      <NetBalanceBarChart persons={persons} coffees={coffees} lineItems={lineItems} procurements={procurements} />
-      <NetBalanceView persons={persons} coffees={coffees} lineItems={lineItems} procurements={procurements} />
     </>
   );
 }
