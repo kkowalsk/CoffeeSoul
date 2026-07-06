@@ -39,49 +39,60 @@ export default function MetricsView({ persons, coffees, lineItems, procurements 
                   <Heading level={4} size="small" margin={{ bottom: 'xsmall', top: 'medium' }}>
                     Brews Ordered
                   </Heading>
-                  <ThemeContext.Extend value={CHART_THEME}>
-                    <DataChart
-                      data={byBrew.map(({ label, count }) => ({ label, count }))}
-                      series={[
-                        { property: 'label', render: (label) => label },
-                        { property: 'count' },
-                      ]}
-                      chart={{ property: 'count', thickness: 'small' }}
-                      gap="none"
-                      direction="horizontal"
-                      size={{ height: '70px', width: 'fill' }}
-                      bounds={{ x: [0, maxCount(byBrew)] }}
-                      axis={{
-                        x: { granularity: 'coarse' },
-                        y: { property: 'label', granularity: 'fine' },
-                      }}
-                      guide={{ x: { granularity: 'coarse' }, y: { granularity: 'fine' } }}
-                    />
-                  </ThemeContext.Extend>
+                  {byBrew.length > 1 ? (
+                    <ThemeContext.Extend value={CHART_THEME}>
+                      <DataChart
+                        data={byBrew.map(({ label, count }) => ({ label, count }))}
+                        series={[
+                          { property: 'label', render: (label) => label },
+                          { property: 'count' },
+                        ]}
+                        chart={{ property: 'count', thickness: 'small' }}
+                        gap="none"
+                        direction="horizontal"
+                        size={{ height: '70px', width: 'fill' }}
+                        bounds={{ x: [0, maxCount(byBrew)] }}
+                        axis={{
+                          x: { granularity: 'coarse' },
+                          y: { property: 'label', granularity: 'fine' },
+                        }}
+                        guide={{ x: { granularity: 'coarse' }, y: { granularity: 'fine' } }}
+                      />
+                    </ThemeContext.Extend>
+                  ) : (
+                    // DataChart's horizontal bar + categorical y-axis crashes when
+                    // there's only a single row (nothing to lay the axis out
+                    // against), so fall back to plain text for a single brew.
+                    <Text>{singleBrewSummary(byBrew, (entry) => `${entry.count}x`)}</Text>
+                  )}
 
                   {/* Each brew's share of this comrade's total spend --
                       brew price * times ordered, in dollars. */}
                   <Heading level={4} size="small" margin={{ bottom: 'xsmall', top: 'medium' }}>
                     Dollars spent per Brew
                   </Heading>
-                  <ThemeContext.Extend value={CHART_THEME}>
-                    <DataChart
-                      data={byBrew.map(({ label, spend }) => ({ label, spend }))}
-                      series={[
-                        { property: 'label', render: (label) => label },
-                        { property: 'spend', prefix: '$' },
-                      ]}
-                      chart={{ property: 'spend', thickness: 'medium' }}
-                      gap="none"
-                      direction="horizontal"
-                      size={{ height: '70px', width: 'fill' }}
-                      axis={{
-                        x: { granularity: 'fine' },
-                        y: { property: 'label', granularity: 'fine' },
-                      }}
-                      guide={{ x: { granularity: 'fine' }, y: { granularity: 'fine' } }}
-                    />
-                  </ThemeContext.Extend>
+                  {byBrew.length > 1 ? (
+                    <ThemeContext.Extend value={CHART_THEME}>
+                      <DataChart
+                        data={byBrew.map(({ label, spend }) => ({ label, spend }))}
+                        series={[
+                          { property: 'label', render: (label) => label },
+                          { property: 'spend', prefix: '$' },
+                        ]}
+                        chart={{ property: 'spend', thickness: 'small' }}
+                        gap="none"
+                        direction="horizontal"
+                        size={{ height: '70px', width: 'fill' }}
+                        axis={{
+                          x: { granularity: 'fine' },
+                          y: { property: 'label', granularity: 'fine' },
+                        }}
+                        guide={{ x: { granularity: 'fine' }, y: { granularity: 'fine' } }}
+                      />
+                    </ThemeContext.Extend>
+                  ) : (
+                    <Text>{singleBrewSummary(byBrew, (entry) => `$${entry.spend}`)}</Text>
+                  )}
                 </Box>
               </Box>
             </AccordionPanel>
@@ -128,6 +139,11 @@ const brewBreakdown = (items) => {
 // [0, max count] (rather than letting DataChart auto-scale/round the max)
 // is what keeps the tick values whole instead of fractional (e.g. 1.8x).
 const maxCount = (byBrew) => byBrew.reduce((max, entry) => Math.max(max, entry.count), 1);
+
+// Plain-text stand-in for the "not enough rows to chart" case (see
+// byBrew.length > 1 checks above) -- covers both zero orders and exactly one.
+const singleBrewSummary = (byBrew, formatValue) =>
+  byBrew.length === 0 ? 'No orders yet' : `${byBrew[0].label}: ${formatValue(byBrew[0])}`;
 
 // Newest first, same as HistoryView -- sorted by the raw timestamp (the
 // formatted display string isn't safe to sort on).
