@@ -52,7 +52,7 @@ export default function BrewsView({ coffees, onCreateBrew }) {
             <Card key={brew.id} pad="small" background="white" border round="small">
               <CardBody pad={{ vertical: 'xsmall' }}>
                 <Heading level={3} size="small" margin="none">
-                  {brew.name} -- ${brew.price}
+                  {brew.name} <i>${brew.price}</i>
                 </Heading>
               </CardBody>
               <CardFooter
