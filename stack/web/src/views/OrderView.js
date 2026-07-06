@@ -1,5 +1,14 @@
 import React, { useState } from 'react';
-import { Box, Button, Diagram, Paragraph, Stack, Text } from 'grommet';
+import { 
+  Box, 
+  Button, 
+  Diagram, 
+  Heading,
+  Paragraph, 
+  Stack, 
+  Text 
+} from 'grommet';
+
 
 // draw-in animation duration (ms) for a newly created connection
 export const DRAW_MS = 1000;
@@ -120,6 +129,9 @@ export default function OrderView({
 
   return (
     <>
+      <Heading level={2}>
+        Place an Order
+      </Heading>
       <Paragraph fill>
         Pick a coffee on the left, then toggle people on the right to connect them.<br></br>Each coffee can map to 0..+ people.
       </Paragraph>

@@ -1,5 +1,12 @@
 import React, { useState } from 'react';
-import { Accordion, AccordionPanel, Box, Heading, Text } from 'grommet';
+import { 
+  Accordion,
+  AccordionPanel,
+  Box,
+  Heading,
+  Paragraph,
+  Text
+} from 'grommet';
 import ProcurementView from './ProcurementView';
 
 // The "History" tab: one accordion panel per procurement, newest first. The
@@ -23,28 +30,36 @@ export default function HistoryView({ procurements, persons, coffees, lineItems 
   const [activeIndexes, setActiveIndexes] = useState([]);
 
   return (
-    <Box pad="medium">
-      <Accordion gap="small" activeIndex={activeIndexes} onActive={setActiveIndexes}>
-        {newestFirst.map((procurement, index) => (
-          <AccordionPanel
-            key={procurement.id}
-            label={panelLabel(procurement, persons, activeIndexes.includes(index))}
-          >
-            {/* This Box only renders while the panel is expanded (AccordionPanel
-                unmounts its children when collapsed), so the background only
-                shows up on whichever panel is currently open. */}
-            <Box background="light-2">
-              <ProcurementView
-                procurement={procurement}
-                persons={persons}
-                coffees={coffees}
-                lineItems={lineItems}
-              />
-            </Box>
-          </AccordionPanel>
-        ))}
-      </Accordion>
-    </Box>
+    <>
+      <Heading level={2}>
+        Order History
+      </Heading>
+      <Paragraph>
+        View a chronological history of past orders.
+      </Paragraph>
+      <Box pad="medium">
+        <Accordion gap="small" activeIndex={activeIndexes} onActive={setActiveIndexes}>
+          {newestFirst.map((procurement, index) => (
+            <AccordionPanel
+              key={procurement.id}
+              label={panelLabel(procurement, persons, activeIndexes.includes(index))}
+            >
+              {/* This Box only renders while the panel is expanded (AccordionPanel
+                  unmounts its children when collapsed), so the background only
+                  shows up on whichever panel is currently open. */}
+              <Box background="light-2">
+                <ProcurementView
+                  procurement={procurement}
+                  persons={persons}
+                  coffees={coffees}
+                  lineItems={lineItems}
+                />
+              </Box>
+            </AccordionPanel>
+          ))}
+        </Accordion>
+      </Box>
+    </>
   );
 }
 

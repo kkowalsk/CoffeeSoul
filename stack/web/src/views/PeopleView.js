@@ -56,6 +56,9 @@ export default function PeopleView({ persons, coffees, onCreatePerson }) {
 
   return (
     <>
+      <Heading level={2}>
+        The Office Crew
+      </Heading>
       <Paragraph fill>
         Configure the Persons who are coming along for a brew.
       </Paragraph>

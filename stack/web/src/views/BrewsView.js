@@ -39,6 +39,9 @@ export default function BrewsView({ coffees, onCreateBrew }) {
 
   return (
     <>
+      <Heading level={2}>
+        Available Brews
+      </Heading>
       <Paragraph fill>
         Set the menu of delectable Brews available for ordering.
       </Paragraph>
