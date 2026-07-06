@@ -56,7 +56,12 @@ export default function MetricsView({ persons, coffees, lineItems, procurements 
               <Box background="light-2">
                 <Box align="stretch" justify="start" pad={{ horizontal: 'medium', vertical: 'xsmall' }}>
                   <Data data={items}>
-                    <DataTable columns={columns(items)} primaryKey="id" />
+                    <DataTable
+                      columns={columns(items)}
+                      primaryKey="id"
+                      size="300px"
+                      pin={{ header: true, footer: true }}
+                    />
                   </Data>
 
                   {/* How many times each brew was ordered. */}
