@@ -9,6 +9,7 @@ import {
   Form,
   FormField,
   Heading,
+  Paragraph,
   Select,
   Text,
   TextInput,
@@ -54,87 +55,93 @@ export default function PeopleView({ persons, coffees, onCreatePerson }) {
   };
 
   return (
-    <Box pad="medium" gap="large">
-      <Cards data={persons} size="medium" gap="medium">
-        {(person) => (
-          <Card key={person.id} pad="small" background="white" border round="small">
-            <CardBody pad={{ vertical: 'xsmall' }}>
-              <Heading level={3} size="small" margin="none">
-                {person.name}
-              </Heading>
-            </CardBody>
-            <CardFooter pad={{ top: 'xsmall' }} border={{ side: 'top', color: 'border' }}>
-              <Text size="small" color="dark-4">
-                {brewName(person.defaultBrewId)}
-              </Text>
-            </CardFooter>
-          </Card>
-        )}
-      </Cards>
+    <>
+      <Paragraph fill>
+        Configure the Persons who are coming along for a brew.
+      </Paragraph>
 
-      <Box width="medium">
-        <Heading level={3} size="small">
-          Add a person
-        </Heading>
-        <Form value={value} onChange={setValue} onSubmit={onSubmit}>
-          <FormField
-            label="Name"
-            name="name"
-            required
-            htmlFor="name"
-            validate={[{ regexp: /^[a-zA-Z]+$/ }]}
-          >
-            <TextInput aria-required id="name" name="name" />
-          </FormField>
-          {/* optional -- Plus reveals the brew picker, Minus clears it back
-              to no default. */}
-          <FormField label="Default Brew" name="defaultBrewId" htmlFor="defaultBrewId">
-            {value.defaultBrewId ? (
-              <Box direction="row" align="center" justify="between" pad={{ vertical: 'xsmall' }}>
-                <Text>{brewName(value.defaultBrewId)}</Text>
-                <Button
-                  plain
-                  a11yTitle="Remove default brew"
-                  icon={<img src="/minus2.png" alt="" width={36} height={36} />}
-                  onClick={clearDefaultBrew}
+      <Box pad="medium" gap="large">
+        <Cards data={persons} size="medium" gap="medium">
+          {(person) => (
+            <Card key={person.id} pad="small" background="white" border round="small">
+              <CardBody pad={{ vertical: 'xsmall' }}>
+                <Heading level={3} size="small" margin="none">
+                  {person.name}
+                </Heading>
+              </CardBody>
+              <CardFooter pad={{ top: 'xsmall' }} border={{ side: 'top', color: 'border' }}>
+                <Text size="small" color="dark-4">
+                  {brewName(person.defaultBrewId)}
+                </Text>
+              </CardFooter>
+            </Card>
+          )}
+        </Cards>
+
+        <Box width="medium">
+          <Heading level={3} size="small">
+            Add a person
+          </Heading>
+          <Form value={value} onChange={setValue} onSubmit={onSubmit}>
+            <FormField
+              label="Name"
+              name="name"
+              required
+              htmlFor="name"
+              validate={[{ regexp: /^[a-zA-Z]+$/ }]}
+            >
+              <TextInput aria-required id="name" name="name" />
+            </FormField>
+            {/* optional -- Plus reveals the brew picker, Minus clears it back
+                to no default. */}
+            <FormField label="Default Brew" name="defaultBrewId" htmlFor="defaultBrewId">
+              {value.defaultBrewId ? (
+                <Box direction="row" align="center" justify="between" pad={{ vertical: 'xsmall' }}>
+                  <Text>{brewName(value.defaultBrewId)}</Text>
+                  <Button
+                    plain
+                    a11yTitle="Remove default brew"
+                    icon={<img src="/minus2.png" alt="" width={36} height={36} />}
+                    onClick={clearDefaultBrew}
+                  />
+                </Box>
+              ) : pickingDefaultBrew ? (
+                <Select
+                  id="defaultBrewId"
+                  name="defaultBrewId"
+                  placeholder="Select a brew"
+                  options={coffees}
+                  labelKey="name"
+                  valueKey={{ key: 'id', reduce: true }}
+                  open={brewSelectOpen}
+                  onOpen={() => setBrewSelectOpen(true)}
+                  onClose={() => setBrewSelectOpen(false)}
                 />
-              </Box>
-            ) : pickingDefaultBrew ? (
-              <Select
-                id="defaultBrewId"
-                name="defaultBrewId"
-                placeholder="Select a brew"
-                options={coffees}
-                labelKey="name"
-                valueKey={{ key: 'id', reduce: true }}
-                open={brewSelectOpen}
-                onOpen={() => setBrewSelectOpen(true)}
-                onClose={() => setBrewSelectOpen(false)}
+              ) : (
+                <Box pad={{ vertical: 'xsmall' }}>
+                  <Button
+                    plain
+                    a11yTitle="Add default brew"
+                    label=""
+                    icon={<img src="/plus.png" alt="" width={36} height={36} />}
+                    onClick={() => {
+                      setPickingDefaultBrew(true);
+                      setBrewSelectOpen(true);
+                    }}
+                  />
+                </Box>
+              )}
+            </FormField>
+            <Box direction="row" justify="end" pad={{ top: 'small' }}>
+              <Button
+                type="submit"
+                primary
+                label="Add Person"
               />
-            ) : (
-              <Box pad={{ vertical: 'xsmall' }}>
-                <Button
-                  plain
-                  a11yTitle="Add default brew"
-                  label=""
-                  icon={<img src="/plus.png" alt="" width={36} height={36} />}
-                  onClick={() => {
-                    setPickingDefaultBrew(true);
-                    setBrewSelectOpen(true);
-                  }}
-                />
-              </Box>
-            )}
-          </FormField>
-          <Box direction="row" justify="end" pad={{ top: 'small' }}>
-            <Button
-              type="submit"
-              primary
-              label="Add Person"
-            />
-          </Box>
-        </Form>
+            </Box>
+          </Form>
+        </Box>
       </Box>
-    </Box>
+    </>
   );
 }

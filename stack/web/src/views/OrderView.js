@@ -120,9 +120,8 @@ export default function OrderView({
 
   return (
     <>
-      <Paragraph>
-        Pick a coffee on the left, then toggle people on the right to connect
-        them. Each coffee can map to 0..* people.
+      <Paragraph fill>
+        Pick a coffee on the left, then toggle people on the right to connect them.<br></br>Each coffee can map to 0..+ people.
       </Paragraph>
 
       {/* interactiveChild="first" -> the boxes get the clicks; the Diagram
