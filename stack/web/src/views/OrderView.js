@@ -5,9 +5,11 @@ import {
   Diagram, 
   Heading,
   Paragraph, 
-  Stack, 
-  Text 
+  Stack,
+  Text
 } from 'grommet';
+
+import NetBalanceView from './NetBalanceView';
 
 
 // draw-in animation duration (ms) for a newly created connection
@@ -72,6 +74,43 @@ export const flipConnection = (setConnections) => (fromTarget, toTarget) =>
       : [...withoutPerson, connection(fromTarget, toTarget)];
   });
 
+// Fisher-Yates -- unlike the common `.sort(() => Math.random() - 0.5)`
+// "shuffle", this doesn't bias toward any particular ordering, which matters
+// here since shuffle order is what decides the 50/50 split below.
+const shuffle = (items) => {
+  const result = [...items];
+  for (let i = result.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+  return result;
+};
+
+// "Randomize" button helper: assigns EVERY person a connection, replacing
+// whatever's currently mapped -- half (by headcount, not just whoever
+// already had a connection) go back to their own default brew (dropped
+// entirely if they don't have one -- there's nothing to reset to); the other
+// half get a different, randomly picked brew (different from whatever
+// they're currently connected to, if anything).
+export const randomizeConnections = (connections, persons, coffees) => {
+  const shuffled = shuffle(persons);
+  const splitAt = Math.floor(shuffled.length / 2);
+
+  const toDefault = shuffled.slice(0, splitAt).flatMap((person) =>
+    person.defaultBrewId ? [connection(person.defaultBrewId, person.id)] : [],
+  );
+
+  const toRandomBrew = shuffled.slice(splitAt).flatMap((person) => {
+    const current = connections.find((c) => c.toTarget === person.id)?.fromTarget;
+    const alternatives = coffees.filter((brew) => brew.id !== current);
+    if (alternatives.length === 0) return [];
+    const pick = alternatives[Math.floor(Math.random() * alternatives.length)];
+    return [connection(pick.id, person.id)];
+  });
+
+  return [...toDefault, ...toRandomBrew];
+};
+
 export const BusyButton = ({ onOrder, onResult }) => {
   const [busy, setBusy] = useState();
   const [success, setSuccess] = useState();
@@ -118,7 +157,10 @@ export default function OrderView({
   isConnected,
   selectPerson,
   onPlaceOrder,
+  onRandomizeConnections,
   payee,
+  lineItems,
+  procurements,
 }) {
   // A person's default-brew suggestion is only shown until they have a REAL
   // connection in this order (to ANY coffee, not just their default) -- once
@@ -224,7 +266,14 @@ export default function OrderView({
           />
         )}
       </Stack>
-    
+
+      <Box align="center" pad={{ top: 'medium' }}>
+        <Button
+          secondary
+          label="Randomize Connections"
+          onClick={() => onRandomizeConnections?.()}
+        />
+      </Box>
       <BusyButton onOrder={onPlaceOrder} onResult={setResponse} />
       {payee && (
         <Box align="center" pad={{ bottom: 'medium' }}>
@@ -232,7 +281,8 @@ export default function OrderView({
           <Text weight="bold">Total: <i>${response?.total}</i></Text>
         </Box>
       )}
-      
+
+      <NetBalanceView persons={persons} coffees={coffees} lineItems={lineItems} procurements={procurements} />
     </>
   );
 }

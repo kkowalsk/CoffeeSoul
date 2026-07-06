@@ -18,6 +18,7 @@ import OrderView, {
   DRAW_MS,
   connection,
   flipConnection,
+  randomizeConnections,
   unclaimedDefaultConnections,
 } from './views/OrderView';
 import PeopleView from './views/PeopleView';
@@ -141,6 +142,11 @@ function App() {
     }
   };
 
+  // "Randomize Connections" button: reshuffle half of the current mappings
+  // back to their owner's default brew, and move the other half to a
+  // different, randomly picked brew. See randomizeConnections in OrderView.
+  const randomizeHalf = () => setConnections((prev) => randomizeConnections(prev, persons, coffees));
+
   // "Place Order": create an Order (procurement), then a LineItem for every
   // explicit connection PLUS every person who never got clicked this round
   // (they get their default brew), then finalize it so the weighted round
@@ -216,7 +222,10 @@ function App() {
                 isConnected={isConnected}
                 selectPerson={selectPerson}
                 onPlaceOrder={placeOrder}
+                onRandomizeConnections={randomizeHalf}
                 payee={payee}
+                lineItems={lineItems}
+                procurements={procurements}
               />
             </Tab>
             <Tab
