@@ -71,3 +71,13 @@
   1) invoke API and load data in App.js for list of Procurements
   2) pass into HistoryView instantiation
   3) use stubbed out ProcurementView.js
+
+
+> the connections in the ordering view needs to be re-designed. there are a number of bugs:
+  0) when a coffee is selected that has default brew connections, the connection color changes, but the person button does not change color.
+  probably triggered the button click event will solve a lot of these issues
+  1) when a coffee/person combo is selected and the selected coffee is not the default brew, remove the grey connection
+
+  additionally, when the order is placed, clear all yellow lines and re-render default connections
+
+    > great, now when order is placed, line items are the combination of remaining default connections + selected connections

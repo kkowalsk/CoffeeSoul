@@ -14,7 +14,12 @@ import {
   Text,
   ToggleGroup,
 } from 'grommet';
-import OrderView, { DRAW_MS, connection, flipConnection } from './views/OrderView';
+import OrderView, {
+  DRAW_MS,
+  connection,
+  flipConnection,
+  unclaimedDefaultConnections,
+} from './views/OrderView';
 import PeopleView from './views/PeopleView';
 import BrewsView from './views/BrewsView';
 import HistoryView from './views/HistoryView';
@@ -131,16 +136,18 @@ function App() {
     }
   };
 
-  // "Place Order": create an Order (procurement), then a LineItem per connection
-  // (coffee = brew = fromTarget, person = comrade = toTarget), then finalize it
-  // so the weighted round robin picks a payee.
+  // "Place Order": create an Order (procurement), then a LineItem for every
+  // explicit connection PLUS every person who never got clicked this round
+  // (they get their default brew), then finalize it so the weighted round
+  // robin picks a payee.
   const placeOrder = async () => {
     if (connections.length === 0) return;
-    console.log('placing order for connections:', connections);
+    const orderConnections = [...connections, ...unclaimedDefaultConnections(persons, connections)];
+    console.log('placing order for connections:', orderConnections);
     setPayee(null);
     const order = await postJson('/procurements', {});
     const newLineItems = await Promise.all(
-      connections.map((c) =>
+      orderConnections.map((c) =>
         postJson('/line-items', {
           procurementId: order.id,
           brewId: c.fromTarget,
