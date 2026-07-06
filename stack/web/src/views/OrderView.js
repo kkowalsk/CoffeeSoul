@@ -9,6 +9,7 @@ import {
   Text
 } from 'grommet';
 
+import NetBalanceBarChart from './NetBalanceBarChart';
 import NetBalanceView from './NetBalanceView';
 
 
@@ -282,6 +283,7 @@ export default function OrderView({
         </Box>
       )}
 
+      <NetBalanceBarChart persons={persons} coffees={coffees} lineItems={lineItems} procurements={procurements} />
       <NetBalanceView persons={persons} coffees={coffees} lineItems={lineItems} procurements={procurements} />
     </>
   );
