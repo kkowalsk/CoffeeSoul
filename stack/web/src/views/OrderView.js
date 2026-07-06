@@ -33,6 +33,17 @@ export const connection = (fromTarget, toTarget, { ...rest } = {}) => ({
   ...rest,
 });
 
+// Everyone with a default brew who doesn't already have a real connection in
+// this order (to ANY coffee -- see the comment on hasConnection below). Used
+// both to render the "suggestion" lines/button highlighting here, and by
+// App's placeOrder to fill in line items for people never explicitly clicked.
+export const unclaimedDefaultConnections = (persons, connections) => {
+  const hasConnection = (comradeId) => connections.some((c) => c.toTarget === comradeId);
+  return persons
+    .filter((comrade) => comrade.defaultBrewId && !hasConnection(comrade.id))
+    .map((comrade) => connection(comrade.defaultBrewId, comrade.id));
+};
+
 // Reusable click handler: maps a person (toTarget) to exactly ONE coffee
 // (fromTarget). Clicking the person's current coffee clears the mapping (flips
 // it off); clicking from a different coffee moves the person there, deleting any
@@ -99,6 +110,14 @@ export default function OrderView({
   onPlaceOrder,
   payee,
 }) {
+  // A person's default-brew suggestion is only shown until they have a REAL
+  // connection in this order (to ANY coffee, not just their default) -- once
+  // they do, the suggestion is redundant/stale and must give way to the real
+  // one. This one check drives both the button highlighting and the default
+  // lines below, so the two can't drift out of sync with each other again.
+  const hasConnection = (comradeId) => connections.some((c) => c.toTarget === comradeId);
+  const unclaimedDefaults = unclaimedDefaultConnections(persons, connections);
+
   return (
     <>
       <Paragraph>
@@ -126,32 +145,37 @@ export default function OrderView({
             ))}
           </Box>
           <Box gap="medium">
-            {persons.map((comrade) => (
-              <OptionBox
-                key={comrade.id}
-                id={comrade.id}
-                label={comrade.name}
-                active={!!coffee && isConnected(coffee, comrade.id)}
-                onClick={() => selectPerson(comrade.id)}
-              />
-            ))}
+            {persons.map((comrade) => {
+              // Matches the "default" Diagram's active-coloring condition
+              // below exactly, so the button and its line always agree.
+              const isUnclaimedDefaultMatch =
+                !!coffee && comrade.defaultBrewId === coffee && !hasConnection(comrade.id);
+              return (
+                <OptionBox
+                  key={comrade.id}
+                  id={comrade.id}
+                  label={comrade.name}
+                  active={(!!coffee && isConnected(coffee, comrade.id)) || isUnclaimedDefaultMatch}
+                  onClick={() => selectPerson(comrade.id)}
+                />
+              );
+            })}
           </Box>
         </Box>
         {/* Each person's default brew, as a background reference -- independent
-            of the order being built below. Muted grey normally; when the
+            of the order being built below, but suppressed once they have a real
+            connection (see hasConnection above). Muted grey normally; when the
             person's default happens to be the selected coffee, it switches to
             the same active color as a real connection would. Rendered first
             (and split the same way as the order-in-progress connections
             below) so the order's own connections always sit on top. */}
         <Diagram
-          connections={persons
-            .filter((comrade) => comrade.defaultBrewId && comrade.defaultBrewId !== coffee)
-            .map((comrade) => connection(comrade.defaultBrewId, comrade.id, { color: OTHER_LINE }))}
+          connections={unclaimedDefaults
+            .filter((c) => c.fromTarget !== coffee)
+            .map((c) => ({ ...c, color: OTHER_LINE }))}
         />
         <Diagram
-          connections={persons
-            .filter((comrade) => comrade.defaultBrewId && comrade.defaultBrewId === coffee)
-            .map((comrade) => connection(comrade.defaultBrewId, comrade.id))}
+          connections={unclaimedDefaults.filter((c) => c.fromTarget === coffee)}
         />
         {/* Connections for OTHER (non-selected) coffees, in muted grey, so
             it's apparent who is already mapped elsewhere. Rendered first so
