@@ -168,6 +168,7 @@ function App() {
     // immediately instead of showing a stale snapshot from page load.
     setProcurements((prev) => [...prev, finalized]);
     setLineItems((prev) => [...prev, ...newLineItems]);
+    return finalized;
   };
 
   // Add a new coffee comrade, then append it to the loaded list so the
