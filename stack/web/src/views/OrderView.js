@@ -72,7 +72,7 @@ export const flipConnection = (setConnections) => (fromTarget, toTarget) =>
       : [...withoutPerson, connection(fromTarget, toTarget)];
   });
 
-export const BusyButton = ({ onOrder }) => {
+export const BusyButton = ({ onOrder, onResult }) => {
   const [busy, setBusy] = useState();
   const [success, setSuccess] = useState();
 
@@ -86,7 +86,8 @@ export const BusyButton = ({ onOrder }) => {
       onClick={async () => {
         setBusy(true);
         try {
-          await onOrder?.();
+          const result = await onOrder?.();
+          onResult?.(result ?? null);
           setSuccess(true);
           setTimeout(() => setSuccess(false), 2000);
         } catch (e) {
@@ -126,6 +127,9 @@ export default function OrderView({
   // lines below, so the two can't drift out of sync with each other again.
   const hasConnection = (comradeId) => connections.some((c) => c.toTarget === comradeId);
   const unclaimedDefaults = unclaimedDefaultConnections(persons, connections);
+  // The finalized procurement returned by the last successful order, so its
+  // total can be shown alongside the payee below.
+  const [response, setResponse] = useState(null);
 
   return (
     <>
@@ -220,13 +224,15 @@ export default function OrderView({
           />
         )}
       </Stack>
-
-      <BusyButton onOrder={onPlaceOrder} />
+    
+      <BusyButton onOrder={onPlaceOrder} onResult={setResponse} />
       {payee && (
         <Box align="center" pad={{ bottom: 'medium' }}>
           <Text weight="bold">{payee} is buying this round!</Text>
+          <Text weight="bold">Total: {response?.total}</Text>
         </Box>
       )}
+      
     </>
   );
 }

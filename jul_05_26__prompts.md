@@ -103,3 +103,5 @@
 > in PeopleView.js, add frontend logic requiring Default Brew to be selected and passed to API
 
 > re-order brew map in OrdersView to be by price ascending
+
+> add optional total field in ProcurementResponse that is unset in create, but included in finalize endpoint
