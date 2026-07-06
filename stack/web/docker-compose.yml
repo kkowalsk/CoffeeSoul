@@ -2,15 +2,33 @@ services:
   web:
     build: .
     restart: unless-stopped
-    # 8082 on the host -> 80 in the container. This nginx is the single public
-    # entry point (serves the UI, proxies /api to the api service). In a real
-    # web deployment this -- behind TLS on 443 -- is the ONLY published port;
-    # api / db / infisical all stay internal-only.
+    # 80/443 published directly -- this nginx (with TLS) is the single public
+    # entry point (serves the UI, proxies /api to the api service). api / db /
+    # infisical all stay internal-only. 80 stays open for the ACME HTTP-01
+    # challenge (and to redirect plain-HTTP visitors to https).
     ports:
-      - "8082:80"
+      - "80:80"
+      - "443:443"
     depends_on:
       api:
         condition: service_healthy
     image: <aws id>.dkr.ecr.us-east-2.amazonaws.com/coffee-soul/web:latest
     # see api/docker-compose.yml -- forces pull-from-ECR over local build
     pull_policy: always
+    volumes:
+      - certbot_conf:/etc/letsencrypt:ro
+      - certbot_www:/var/www/certbot:ro
+
+  # Not a long-running service -- invoked on-demand via `docker compose run
+  # --rm certbot ...` (see init-letsencrypt.sh) for initial issuance, and via
+  # cron for renewal. Shares volumes with web so nginx can read whatever
+  # certbot writes without a restart (webroot challenge, no port conflicts).
+  certbot:
+    image: certbot/certbot
+    volumes:
+      - certbot_conf:/etc/letsencrypt
+      - certbot_www:/var/www/certbot
+
+volumes:
+  certbot_conf:
+  certbot_www:
