@@ -27,6 +27,7 @@ To simplify the problem space, the following assumptions were made:
 1) the goal is to aim for each person to overall spend about what they would've paid if only purchasing their own line items
 1) once a person is added to the group, they must order a coffee each time
 1) a person must have a default drink, but is allowed to change what drink they order
+1) new drinks may be added, but their prices never change
 
 ## Development Approach
 
