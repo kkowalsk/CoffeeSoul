@@ -167,8 +167,8 @@ function App() {
   // state) so the simulation can pass its own just-randomized set without
   // waiting on a state update to land first.
   const placeOrderWith = async (activeConnections) => {
-    if (activeConnections.length === 0) return null;
     const orderConnections = [...activeConnections, ...unclaimedDefaultConnections(persons, activeConnections)];
+    if (orderConnections.length === 0) return null;
     console.log('placing order for connections:', orderConnections);
     setPayee(null);
     const order = await postJson('/procurements', {});
