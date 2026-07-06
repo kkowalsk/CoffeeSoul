@@ -186,16 +186,16 @@ def init():
 
         # print(comrade.name, total)
 
-    roundRobin = SmoothWeightedRoundRobin(True)
-    # for p in reversed(procurements):
-        # roundRobin._add(p)
+    roundRobin = SmoothWeightedRoundRobin(False)
+    for p in reversed(procurements):
+        roundRobin._add(p)
     print("\nRoundRobin:")
     print(roundRobin)
     print()
-    # roundRobin.calculateHistoricalPayees()
-    for i in range(10):
-        roundRobin.process(procurements[i])
-        print(f'{procurements[i].payee.name}\'s turn to pay')
+    roundRobin.calculateHistoricalPayees()
+    # for i in range(len(procurements)):
+        # roundRobin.process(procurements[i])
+        # print(f'{procurements[i].payee.name}\'s turn to pay')
 
 if __name__ == "__main__":
     init()
