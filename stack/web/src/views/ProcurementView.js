@@ -28,7 +28,7 @@ export default function ProcurementView({ procurement, persons, coffees, lineIte
       property: 'person',
       header: 'Person',
       primary: true,
-      // footer: <b><Text color="#01A982">{payeeName}</Text></b>,
+      footer: <b><Text color="#01A982">{payeeName}</Text></b>,
     },
     { property: 'brew', header: 'Brew' },
     {
@@ -36,7 +36,7 @@ export default function ProcurementView({ procurement, persons, coffees, lineIte
       header: 'Price',
       align: 'end',
       render: (datum) => `$${datum.price}`,
-      footer: `$${total.toFixed(2)}`,
+      footer: <b><Text color="#01A982">${total.toFixed(2)}</Text></b>,
     },
   ];
 
