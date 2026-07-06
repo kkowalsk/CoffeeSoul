@@ -44,7 +44,7 @@ export default function PeopleView({ persons, coffees, onCreatePerson }) {
     try {
       await onCreatePerson({
         name: submitted.name,
-        defaultBrewId: submitted.defaultBrewId ?? null,
+        defaultBrewId: submitted.defaultBrewId,
       });
       setValue(emptyPerson);
       setPickingDefaultBrew(false);
@@ -95,9 +95,17 @@ export default function PeopleView({ persons, coffees, onCreatePerson }) {
             >
               <TextInput aria-required id="name" name="name" />
             </FormField>
-            {/* optional -- Plus reveals the brew picker, Minus clears it back
-                to no default. */}
-            <FormField label="Default Brew" name="defaultBrewId" htmlFor="defaultBrewId">
+            {/* required -- Plus reveals the brew picker, Minus clears it back
+                to unset (which re-triggers the required validation on submit). */}
+            <FormField
+              label="Default Brew"
+              name="defaultBrewId"
+              htmlFor="defaultBrewId"
+              required
+              validate={[
+                (defaultBrewId) => (defaultBrewId ? undefined : 'Select a default brew'),
+              ]}
+            >
               {value.defaultBrewId ? (
                 <Box direction="row" align="center" justify="between" pad={{ vertical: 'xsmall' }}>
                   <Text>{brewName(value.defaultBrewId)}</Text>
