@@ -1,5 +1,5 @@
 import React from 'react';
-import { DataChart, Heading } from 'grommet';
+import { DataChart, Heading, Text } from 'grommet';
 
 // Categorical palette, slots 1-8 in fixed order (see the dataviz skill's
 // references/palette.md -- validated: worst adjacent CVD ΔE 24.2 in light
@@ -65,15 +65,14 @@ const shortDate = (value) => {
 export default function NetBalanceView({ persons, coffees, lineItems, procurements }) {
   const data = balanceSeries(persons, lineItems, coffees, procurements);
 
-  // DataChart's line rendering needs at least two points to draw a line --
-  // and there's nothing to trend on before the first procurement anyway.
-  if (data.length < 2) return null;
-
   return (
     <>
       <Heading level={3} size="small" margin={{ bottom: 'xsmall', top: 'none' }}>
         Net Balance over time
       </Heading>
+      {data.length < 2 ? (
+        <Text color="dark-4">Not enough orders yet to show a trend.</Text>
+      ) : (
       <DataChart
         data={data}
         series={[
@@ -106,6 +105,7 @@ export default function NetBalanceView({ persons, coffees, lineItems, procuremen
         detail
         size={{ height: '300px', width: 'fill' }}
       />
+      )}
     </>
   );
 }
