@@ -1,4 +1,187 @@
-// The "Metrics" tab. No content yet.
-export default function MetricsView() {
-  return null;
+import React, { useState } from 'react';
+import { Accordion, AccordionPanel, Box, Data, DataChart, DataTable, Heading, Text, ThemeContext } from 'grommet';
+
+// DataChart draws bars from this palette by default (one entry per series).
+// Overriding it locally (rather than passing a `chart` prop with a color) is
+// what keeps each row bound to its OWN value -- adding an explicit `chart`
+// prop here breaks that per-row binding and makes every bar render the same
+// (last) value instead of its own.
+const CHART_THEME = { dataChart: { colors: ['#4B4B4B'] } };
+
+// The "Metrics" tab: one accordion panel per coffee comrade, listing every
+// line item they've ever ordered. Same pattern as HistoryView -- persons/
+// coffees/lineItems/procurements are loaded in App and passed straight
+// through; the grey background only shows on whichever panel is expanded.
+export default function MetricsView({ persons, coffees, lineItems, procurements }) {
+  const [activeIndexes, setActiveIndexes] = useState([]);
+
+  return (
+    <Box pad="medium">
+      <Accordion gap="small" activeIndex={activeIndexes} onActive={setActiveIndexes}>
+        {persons.map((comrade, index) => {
+          const items = comradeLineItems(comrade, lineItems, coffees, procurements);
+          const byBrew = brewBreakdown(items);
+          return (
+            <AccordionPanel
+              key={comrade.id}
+              label={panelLabel(comrade, activeIndexes.includes(index))}
+            >
+              {/* This Box only renders while the panel is expanded (AccordionPanel
+                  unmounts its children when collapsed), so the background only
+                  shows up on whichever panel is currently open. */}
+              <Box background="light-2">
+                <Box align="stretch" justify="start" pad={{ horizontal: 'medium', vertical: 'xsmall' }}>
+                  <Data data={items}>
+                    <DataTable columns={columns(items)} primaryKey="id" />
+                  </Data>
+
+                  {/* How many times each brew was ordered. */}
+                  <Heading level={4} size="small" margin={{ bottom: 'xsmall', top: 'medium' }}>
+                    Brews Ordered
+                  </Heading>
+                  <ThemeContext.Extend value={CHART_THEME}>
+                    <DataChart
+                      data={byBrew.map(({ label, count }) => ({ label, count }))}
+                      series={[
+                        { property: 'label', render: (label) => label },
+                        { property: 'count' },
+                      ]}
+                      chart={{ property: 'count', thickness: 'small' }}
+                      gap="none"
+                      direction="horizontal"
+                      size={{ height: '70px', width: 'fill' }}
+                      bounds={{ x: [0, maxCount(byBrew)] }}
+                      axis={{
+                        x: { granularity: 'coarse' },
+                        y: { property: 'label', granularity: 'fine' },
+                      }}
+                      guide={{ x: { granularity: 'coarse' }, y: { granularity: 'fine' } }}
+                    />
+                  </ThemeContext.Extend>
+
+                  {/* Each brew's share of this comrade's total spend --
+                      brew price * times ordered, in dollars. */}
+                  <Heading level={4} size="small" margin={{ bottom: 'xsmall', top: 'medium' }}>
+                    Dollars spent per Brew
+                  </Heading>
+                  <ThemeContext.Extend value={CHART_THEME}>
+                    <DataChart
+                      data={byBrew.map(({ label, spend }) => ({ label, spend }))}
+                      series={[
+                        { property: 'label', render: (label) => label },
+                        { property: 'spend', prefix: '$' },
+                      ]}
+                      chart={{ property: 'spend', thickness: 'medium' }}
+                      gap="none"
+                      direction="horizontal"
+                      size={{ height: '70px', width: 'fill' }}
+                      axis={{
+                        x: { granularity: 'fine' },
+                        y: { property: 'label', granularity: 'fine' },
+                      }}
+                      guide={{ x: { granularity: 'fine' }, y: { granularity: 'fine' } }}
+                    />
+                  </ThemeContext.Extend>
+                </Box>
+              </Box>
+            </AccordionPanel>
+          );
+        })}
+      </Accordion>
+    </Box>
+  );
 }
+
+// AccordionPanel only applies its themed padding + Heading typography when
+// label is a plain string -- anything else (a custom node) is rendered raw,
+// with none of that theming. So to add the isActive-conditional grey
+// background here we rebuild that same Box/Heading treatment by hand,
+// same as HistoryView's panelLabel.
+const panelLabel = (comrade, isActive) => (
+  <Box
+    fill="horizontal"
+    pad={{ horizontal: 'xsmall' }}
+    background={isActive ? 'light-2' : undefined}
+  >
+    <Heading level={4} margin="none">{comrade.name}</Heading>
+  </Box>
+);
+
+// Per-brew rollup of a comrade's line items: how many times they ordered it,
+// and how much of their spend (brew price * times ordered) it accounts for.
+const brewBreakdown = (items) => {
+  const byBrew = new Map();
+  for (const item of items) {
+    const entry = byBrew.get(item.brew) ?? { label: item.brew, count: 0, spend: 0 };
+    entry.count += 1;
+    entry.spend += Number(item.price);
+    byBrew.set(item.brew, entry);
+  }
+  return Array.from(byBrew.values()).map((entry) => ({
+    label: entry.label,
+    count: entry.count,
+    spend: Math.round(entry.spend * 100) / 100,
+  }));
+};
+
+// Counts are always whole numbers -- forcing the x-axis bounds to exactly
+// [0, max count] (rather than letting DataChart auto-scale/round the max)
+// is what keeps the tick values whole instead of fractional (e.g. 1.8x).
+const maxCount = (byBrew) => byBrew.reduce((max, entry) => Math.max(max, entry.count), 1);
+
+// Newest first, same as HistoryView -- sorted by the raw timestamp (the
+// formatted display string isn't safe to sort on).
+const comradeLineItems = (comrade, lineItems, coffees, procurements) =>
+  lineItems
+    .filter((li) => li.comradeId === comrade.id)
+    .map((li) => {
+      const brew = coffees.find((c) => c.id === li.brewId);
+      const procurement = procurements.find((p) => p.id === li.procurementId);
+      return {
+        id: li.id,
+        timestamp: procurement?.timestamp,
+        date: procurement?.timestamp ? new Date(procurement.timestamp).toLocaleString() : 'Unknown time',
+        brew: brew?.name ?? 'Unknown',
+        price: brew?.price ?? 0,
+        // this comrade was the one who ended up paying for that order
+        isPayee: !!procurement && procurement.payeeId === comrade.id,
+      };
+    })
+    .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+// Bold + colored for rows belonging to an order this comrade paid for.
+const cell = (value, isPayee) =>
+  isPayee ? (
+    <Text weight="bold" color="#01A982">
+      {value}
+    </Text>
+  ) : (
+    value
+  );
+
+// Column-level "footer" renders a separate row below a divider line, below
+// the line items -- same DataTable footer pattern as ProcurementView.
+const columns = (items) => {
+  const total = items.reduce((sum, item) => sum + Number(item.price), 0);
+  return [
+    {
+      property: 'date',
+      header: 'Date',
+      primary: true,
+      render: (datum) => cell(datum.date, datum.isPayee),
+    },
+    {
+      property: 'brew',
+      header: 'Brew',
+      render: (datum) => cell(datum.brew, datum.isPayee),
+      footer: '',
+    },
+    {
+      property: 'price',
+      header: 'Price',
+      align: 'end',
+      render: (datum) => cell(`$${datum.price}`, datum.isPayee),
+      footer: `$${total.toFixed(2)}`,
+    },
+  ];
+};
