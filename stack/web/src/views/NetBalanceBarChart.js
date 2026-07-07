@@ -59,37 +59,48 @@ export default function NetBalanceBarChart({ persons, coffees, lineItems, procur
       {data.length === 0 || procurements.length === 0 ? (
         <Text color="dark-4">No people/data yet.</Text>
       ) : (
-        <DataChart
-          data={data}
-          series={[
-            { property: 'x' },
-            { property: 'label', render: verticalLabel },
-            // prefix carries through to the y-axis ticks too -- DataChart
-            // borrows the series matching axis.y.property's prefix/render to
-            // format the shared y-axis, not just this series' own tooltip.
-            { property: 'balance', prefix: '$' },
-          ]}
-          // property as an object (rather than the plain 'balance' string)
-          // is what lets each bar get its own color -- DataChart reads
-          // color.transform(value) per datapoint instead of one flat hue
-          // for the whole series.
-          chart={{
-            property: { x: 'x', y: 'balance', color: { property: 'balance', transform: (v) => barColor(v, highest) } },
-            type: 'bar',
-            thickness: 'small',
-          }}
-          axis={{
-            // 'fine' forces one tick per row -- the default 'coarse' only
-            // labels a couple of bars, leaving the rest unlabeled.
-            x: { property: 'label', granularity: 'fine' },
-            y: { property: 'balance', granularity: 'fine' },
-          }}
-          guide={{ x: {}, y: { granularity: 'fine' } }}
-          // taller than a plain-text-label chart would need, to leave room
-          // for the now-vertical (and therefore taller) x-axis labels --
-          // a fixed height that only fit the plot would clip them.
-          size={{ height: '280px', width: 'fill' }}
-        />
+        <>
+          <DataChart
+            data={data}
+            series={[
+              { property: 'x' },
+              { property: 'label', render: verticalLabel },
+              // prefix carries through to the y-axis ticks too -- DataChart
+              // borrows the series matching axis.y.property's prefix/render to
+              // format the shared y-axis, not just this series' own tooltip.
+              { property: 'balance', prefix: '$' },
+            ]}
+            // property as an object (rather than the plain 'balance' string)
+            // is what lets each bar get its own color -- DataChart reads
+            // color.transform(value) per datapoint instead of one flat hue
+            // for the whole series.
+            chart={{
+              property: { x: 'x', y: 'balance', color: { property: 'balance', transform: (v) => barColor(v, highest) } },
+              type: 'bar',
+              thickness: 'small',
+            }}
+            axis={{
+              // 'fine' forces one tick per row -- the default 'coarse' only
+              // labels a couple of bars, leaving the rest unlabeled.
+              x: { property: 'label', granularity: 'fine' },
+              y: { property: 'balance', granularity: 'fine' },
+            }}
+            guide={{ x: {}, y: { granularity: 'fine' } }}
+            // taller than a plain-text-label chart would need, to leave room
+            // for the now-vertical (and therefore taller) x-axis labels --
+            // a fixed height that only fit the plot would clip them.
+            size={{ height: '280px', width: 'fill' }}
+          />
+          <Text color={POS_COLOR}>
+            Owes more than they've previously paid
+          </Text>
+          <Text color={NEG_COLOR}>
+            Has already paid more than they owe
+          </Text>
+          <Text color={HIGHEST_COLOR}>
+            Owes the most and is up next to pay
+          </Text>
+        </>
       )}
     </>
   );
