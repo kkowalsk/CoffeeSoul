@@ -3,7 +3,12 @@ import { DataChart, Heading, Text } from 'grommet';
 
 const NEG_COLOR = '#e34948';
 const POS_COLOR = '#2a78d6';
-const barColor = (balance) => (balance < 0 ? NEG_COLOR : POS_COLOR);
+const HIGHEST_COLOR = '#59D420';
+const barColor = (balance, highest) => {
+  if (balance === highest) return HIGHEST_COLOR;
+  if (balance < 0) return NEG_COLOR;
+  return POS_COLOR;
+};
 
 // Each person's CURRENT net balance: total spend (their own line items,
 // across every order) minus total paid (procurement totals for orders
@@ -44,6 +49,7 @@ const verticalLabel = (label) => (
 // unlike NetBalanceView it's a single point in time, not a trend.
 export default function NetBalanceBarChart({ persons, coffees, lineItems, procurements }) {
   const data = withRowIndex(currentBalances(persons, lineItems, coffees, procurements));
+  const highest = data.length ? Math.max(...data.map((d) => d.balance)) : undefined;
 
   return (
     <>
@@ -68,7 +74,7 @@ export default function NetBalanceBarChart({ persons, coffees, lineItems, procur
           // color.transform(value) per datapoint instead of one flat hue
           // for the whole series.
           chart={{
-            property: { x: 'x', y: 'balance', color: { property: 'balance', transform: barColor } },
+            property: { x: 'x', y: 'balance', color: { property: 'balance', transform: (v) => barColor(v, highest) } },
             type: 'bar',
             thickness: 'small',
           }}
