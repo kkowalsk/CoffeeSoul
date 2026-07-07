@@ -1,10 +1,14 @@
 import React from 'react';
-import { DataChart, Heading, Text, ThemeContext } from 'grommet';
+import { DataChart, Heading, Text } from 'grommet';
 
-// Single-series nominal bars (one per person) all take the same slot-1 hue
-// from the dataviz skill's categorical palette -- sign isn't color-coded
-// here, just position relative to the zero baseline.
-const CHART_THEME = { dataChart: { colors: ['#2a78d6'] } };
+const NEG_COLOR = '#e34948';
+const POS_COLOR = '#2a78d6';
+const HIGHEST_COLOR = '#59D420';
+const barColor = (balance, highest) => {
+  if (balance === highest) return HIGHEST_COLOR;
+  if (balance < 0) return NEG_COLOR;
+  return POS_COLOR;
+};
 
 // Each person's CURRENT net balance: total spend (their own line items,
 // across every order) minus total paid (procurement totals for orders
@@ -23,6 +27,13 @@ const currentBalances = (persons, lineItems, coffees, procurements) =>
     return { label: person.name, balance: Math.round((spend - paid) * 100) / 100 };
   });
 
+// DataChart's per-datapoint color (chart.property.color) requires
+// chart.property.x to be numeric -- calcBounds() takes min/max of it, which
+// is NaN for the string 'label' field and silently drops every bar. This
+// synthetic row index gives it a numeric x while 'label' still drives the
+// axis tick text (looked up by row position, independent of the chart's x).
+const withRowIndex = (data) => data.map((d, x) => ({ ...d, x }));
+
 // Rotated 90deg so every person's name fits without overlapping its
 // neighbors -- horizontal labels collide once there are more than a
 // handful of bars.
@@ -37,7 +48,8 @@ const verticalLabel = (label) => (
 // any view that wants an at-a-glance "who's ahead / behind right now" --
 // unlike NetBalanceView it's a single point in time, not a trend.
 export default function NetBalanceBarChart({ persons, coffees, lineItems, procurements }) {
-  const data = currentBalances(persons, lineItems, coffees, procurements);
+  const data = withRowIndex(currentBalances(persons, lineItems, coffees, procurements));
+  const highest = data.length ? Math.max(...data.map((d) => d.balance)) : undefined;
 
   return (
     <>
@@ -47,30 +59,48 @@ export default function NetBalanceBarChart({ persons, coffees, lineItems, procur
       {data.length === 0 || procurements.length === 0 ? (
         <Text color="dark-4">No people/data yet.</Text>
       ) : (
-      <ThemeContext.Extend value={CHART_THEME}>
-        <DataChart
-          data={data}
-          series={[
-            { property: 'label', render: verticalLabel },
-            // prefix carries through to the y-axis ticks too -- DataChart
-            // borrows the series matching axis.y.property's prefix/render to
-            // format the shared y-axis, not just this series' own tooltip.
-            { property: 'balance', prefix: '$' },
-          ]}
-          chart={{ property: 'balance', type: 'bar', thickness: 'small' }}
-          axis={{
-            // 'fine' forces one tick per row -- the default 'coarse' only
-            // labels a couple of bars, leaving the rest unlabeled.
-            x: { property: 'label', granularity: 'fine' },
-            y: { property: 'balance', granularity: 'fine' },
-          }}
-          guide={{ x: {}, y: { granularity: 'fine' } }}
-          // taller than a plain-text-label chart would need, to leave room
-          // for the now-vertical (and therefore taller) x-axis labels --
-          // a fixed height that only fit the plot would clip them.
-          size={{ height: '280px', width: 'fill' }}
-        />
-      </ThemeContext.Extend>
+        <>
+          <DataChart
+            data={data}
+            series={[
+              { property: 'x' },
+              { property: 'label', render: verticalLabel },
+              // prefix carries through to the y-axis ticks too -- DataChart
+              // borrows the series matching axis.y.property's prefix/render to
+              // format the shared y-axis, not just this series' own tooltip.
+              { property: 'balance', prefix: '$' },
+            ]}
+            // property as an object (rather than the plain 'balance' string)
+            // is what lets each bar get its own color -- DataChart reads
+            // color.transform(value) per datapoint instead of one flat hue
+            // for the whole series.
+            chart={{
+              property: { x: 'x', y: 'balance', color: { property: 'balance', transform: (v) => barColor(v, highest) } },
+              type: 'bar',
+              thickness: 'small',
+            }}
+            axis={{
+              // 'fine' forces one tick per row -- the default 'coarse' only
+              // labels a couple of bars, leaving the rest unlabeled.
+              x: { property: 'label', granularity: 'fine' },
+              y: { property: 'balance', granularity: 'fine' },
+            }}
+            guide={{ x: {}, y: { granularity: 'fine' } }}
+            // taller than a plain-text-label chart would need, to leave room
+            // for the now-vertical (and therefore taller) x-axis labels --
+            // a fixed height that only fit the plot would clip them.
+            size={{ height: '280px', width: 'fill' }}
+          />
+          <Text color={POS_COLOR}>
+            Owes more than they've previously paid
+          </Text>
+          <Text color={NEG_COLOR}>
+            Has already paid more than they owe
+          </Text>
+          <Text color={HIGHEST_COLOR}>
+            Owes the most and is up next to pay
+          </Text>
+        </>
       )}
     </>
   );
