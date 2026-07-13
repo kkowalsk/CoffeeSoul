@@ -77,6 +77,10 @@ The main components of this stack are:
 * React/Grommet UI
 * Infisical secret management
 
+### Self Hosted and routed via Cloudflare
+
+Currently deployed at [coffeesoul.cd-ll.com](https://coffeesoul.cd-ll.com) which is self hosted on a homelab server and served up via Cloudflare's Tunnel solution.
+
 ### AWS
 
 Currently deployed at [coffeesoul.kowalski.nz](https://coffeesoul.kowalski.nz)
